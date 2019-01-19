@@ -2,5 +2,5 @@
 A Group Game Project
 
 Current Confirmed InformatioN:
-- It's A 2D Game
+- It's a 2D Game
 - It will be made in unity
