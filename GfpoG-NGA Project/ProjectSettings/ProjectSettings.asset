@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 15
-  productGUID: ef575c1b1bd91504f84ae2f95a1d4567
+  productGUID: 180fc072a9a18f94d8f1bdf4ff3ef8bc
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: TinyRPG
+  productName: DeathGame
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -580,10 +580,10 @@ PlayerSettings:
   facebookXfbml: 0
   facebookFrictionlessRequests: 1
   apiCompatibilityLevel: 6
-  cloudProjectId: 19766029-dfa0-4830-9ecb-62afbf12d5fc
+  cloudProjectId: 0a490240-3715-4762-9e19-8582b42a5efd
   framebufferDepthMemorylessMode: 0
-  projectName: GfpoG.NGA Project
-  organizationId: imdabanana
+  projectName: DeathGame
+  organizationId: unity_iudlt50ok6ml8w
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0
