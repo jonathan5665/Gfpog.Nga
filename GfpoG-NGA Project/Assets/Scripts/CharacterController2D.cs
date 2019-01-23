@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Tilemaps;
 
 public class CharacterController2D : MonoBehaviour
 {
@@ -24,7 +25,9 @@ public class CharacterController2D : MonoBehaviour
     private float playerGravity = 3f;  // for storing the original player gravity
     private bool canJump = true;  // can the character jump again
 
-	[Header("Events")]
+    public Tile corpse; //This character's corpse tile.
+
+    [Header("Events")]
 	[Space]
 
 	public UnityEvent OnLandEvent;
@@ -53,8 +56,9 @@ public class CharacterController2D : MonoBehaviour
 		bool wasGrounded = m_Grounded;
 		m_Grounded = false;
 
-		// The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
-		// This can be done using layers instead but Sample Assets will not overwrite your project settings.
+        // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
+        // This can be done using layers instead but Sample Assets will not overwrite your project settings.
+
 		Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
 		for (int i = 0; i < colliders.Length; i++)
 		{

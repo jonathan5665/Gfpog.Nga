@@ -5,12 +5,12 @@ using UnityEngine.Tilemaps;
 
 public class Spikes : MonoBehaviour
 {
-    [SerializeField] private Tilemap tilemap;
+    private Tilemap tilemap;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        tilemap = GetComponent<Tilemap>();
     }
 
     // Update is called once per frame
@@ -21,7 +21,7 @@ public class Spikes : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        var tilePos = tilemap.WorldToCell(collision.transform.position);
+        Vector3Int tilePos = tilemap.WorldToCell(collision.transform.position);
         Debug.Log(tilePos);
     }
 }
