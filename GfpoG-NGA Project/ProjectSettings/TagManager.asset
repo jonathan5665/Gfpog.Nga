@@ -15,7 +15,7 @@ TagManager:
   - 
   - Player
   - Ground
-  - 
+  - Background
   - 
   - 
   - 
@@ -43,4 +43,7 @@ TagManager:
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Ui
+    uniqueID: 2102400891
     locked: 0

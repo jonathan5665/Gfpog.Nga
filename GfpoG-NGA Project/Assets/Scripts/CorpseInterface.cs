@@ -8,7 +8,7 @@ public class CorpseInterface : MonoBehaviour
 {
     // Variables
     [Header("Fat Corpse")]
-    [Range(0, 500)]  [SerializeField] private float m_FatCorpseForce = 10f;      // the jump force the fat corpse applies
+    [Range(0, 1500)]  [SerializeField] private float m_FatCorpseForce = 1000f;      // the jump force the fat corpse applies
 
     private Tilemap tilemap;
     private LevelController level;
@@ -67,9 +67,15 @@ public class CorpseInterface : MonoBehaviour
 
     private void FatCorpse(Collision2D collision)
     {
-        Debug.Log("here");
+        CharacterController2D player = collision.gameObject.GetComponent<CharacterController2D>();
+        if (player == null)
+        {
+            return;
+        }
         Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
         Debug.Log(collision.gameObject.name);
-        rb.AddForce(new Vector2(0f, 300f));
+        rb.AddForce(new Vector2(0f, m_FatCorpseForce));
+        // no extra jumping on these
+        player.DenyJump();
     }
 }   
