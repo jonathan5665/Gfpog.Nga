@@ -1279,7 +1279,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 9
+  m_GravityScale: 3
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -1298,10 +1298,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_JumpForce: 700
-  m_GravMul: 1.5
+  m_LowJumpMul: 2
+  m_JumpEndMul: 2.5
   m_CrouchSpeed: 0.36
   m_MovementSmoothing: 0.05
   m_AirControl: 1
+  m_JumpOnContact: 1
   m_WhatIsGround:
     serializedVersion: 2
     m_Bits: 55
@@ -1355,7 +1357,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 6fec0f74b96212e4d9b02b75611cbd11, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f8aac0c3ad3af1241940a43e5bbf521f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1374,7 +1376,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1283576064}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.56, y: 1.85, z: -0.020943154}
+  m_LocalPosition: {x: -5.499, y: 1.85, z: -0.020943154}
   m_LocalScale: {x: 0.202, y: 0.205, z: 1}
   m_Children:
   - {fileID: 1229489199}
@@ -1399,7 +1401,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 4.81, y: 4.81}
+    oldSize: {x: 4.923077, y: 4.923077}
     newSize: {x: 0.33, y: 0.32}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
