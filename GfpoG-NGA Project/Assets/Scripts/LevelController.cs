@@ -43,11 +43,12 @@ public class LevelController : MonoBehaviour
 
         // place a corpse
         corpseMap.SetTile(tilePos, player.corpse);
+        corpseMap.GetComponent<CompositeCollider2D>().GenerateGeometry();
 
         Debug.Log("Lives: " + currentLives);
 
         // respawn or reset the level
-        if (currentLives > 0)
+        if (currentLives > 1)
         {
             //Remove a life
             currentLives -= 1;
@@ -61,5 +62,10 @@ public class LevelController : MonoBehaviour
             //Reload the current scene. This needs to be redone once we get more levels.
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+    }
+
+    public CharacterController2D GetPlayer()
+    {
+        return player;
     }
 }

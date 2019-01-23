@@ -29,7 +29,6 @@ public class CorpseInterface : MonoBehaviour
     // the collision function for the basic corpse
     private void BasicCorpse(Collision2D collision)
     {
-        Debug.Log("Basic Corpse collision");
     }
 
 }   

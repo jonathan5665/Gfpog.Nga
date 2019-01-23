@@ -184,4 +184,10 @@ public class CharacterController2D : MonoBehaviour
 		theScale.x *= -1;
 		transform.localScale = theScale;
 	}
+
+    // getters and setters
+    public bool IsGrouned()
+    {
+        return m_Grounded;
+    }
 }
