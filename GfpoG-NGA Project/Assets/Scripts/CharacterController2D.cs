@@ -7,8 +7,9 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private float m_LowJumpMul = 2f;                           // Gravity multiplier if jumpkey is released
     [SerializeField] private float m_JumpEndMul = 2.5f;                         // Gravity multiplier for the downward part of the jump
     [Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;			// Amount of maxSpeed applied to crouching movement. 1 = 100%
-	[Range(0, .3f)] [SerializeField] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
-	[SerializeField] private bool m_AirControl = false;							// Whether or not a player can steer while jumping;
+	[Range(0, .3f)] [SerializeField] private float m_GroundSmoothing = .05f;	// How much to smooth out the movement
+    [Range(0, .3f)] [SerializeField] private float m_AirSmoothing = .1f;        // How much to smooth out the movement
+    [SerializeField] private bool m_AirControl = false;							// Whether or not a player can steer while jumping;
     [SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
 	[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
 	[SerializeField] private Transform m_CeilingCheck;							// A position marking where to check for ceilings
@@ -113,8 +114,18 @@ public class CharacterController2D : MonoBehaviour
 
 			// Move the character by finding the target velocity
 			Vector3 targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
+            float movementSmoothing;
+
+            if (m_Grounded)
+            {
+                movementSmoothing = m_GroundSmoothing;
+            } else
+            {
+                movementSmoothing = m_AirSmoothing;
+            }
+
 			// And then smoothing it out and applying it to the character
-			m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
+			m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, movementSmoothing);
 
 			// If the input is moving the player right and the player is facing left...
 			if (move > 0 && !m_FacingRight)
