@@ -567,6 +567,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3df69c90237d2ce478c21cd1dc0a72d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_FatCorpseForce: 10
 --- !u!19719996 &554511803
 TilemapCollider2D:
   m_ObjectHideFlags: 0
@@ -671,7 +672,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 554511800}
-  m_BodyType: 0
+  m_BodyType: 2
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0

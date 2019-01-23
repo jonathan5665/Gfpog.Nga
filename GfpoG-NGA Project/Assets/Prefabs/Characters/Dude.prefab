@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5830360382582689920}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.3, z: 0}
+  m_LocalPosition: {x: 0, y: -0.45, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5830360383721336404}
@@ -41,9 +41,9 @@ GameObject:
   - component: {fileID: 5830360383721336404}
   - component: {fileID: 5830360383721336403}
   - component: {fileID: 5830360383721336401}
-  - component: {fileID: 5830360383721336405}
   - component: {fileID: 5830360383721336406}
   - component: {fileID: 7906783103442515105}
+  - component: {fileID: 3592167501347426683}
   m_Layer: 8
   m_Name: Dude
   m_TagString: Untagged
@@ -60,7 +60,7 @@ Transform:
   m_GameObject: {fileID: 5830360383721336400}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -5.5, y: 2, z: 0}
-  m_LocalScale: {x: 0.202, y: 0.205, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5830360383817333631}
   - {fileID: 5830360382582689921}
@@ -136,32 +136,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!61 &5830360383721336405
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5830360383721336400}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 6200000, guid: ed5ed3a8052a3d5408f67e93f0fecbbd, type: 2}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 4.923077, y: 4.923077}
-    newSize: {x: 0.33, y: 0.32}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 4.81, y: 4.81}
-  m_EdgeRadius: 0
 --- !u!114 &5830360383721336406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,7 +175,7 @@ MonoBehaviour:
   m_GroundCheck: {fileID: 5830360382582689921}
   m_CeilingCheck: {fileID: 5830360383817333631}
   m_CrouchDisableCollider: {fileID: 0}
-  corpse: {fileID: 11400000, guid: f1d1cc0f69f3dc8479b7a197e9a8e876, type: 2}
+  corpse: {fileID: 11400000, guid: 3ccd5795e68a25643a08b83867d27863, type: 2}
   OnLandEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -212,6 +186,32 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: CharacterController2D+BoolEvent, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
+--- !u!61 &3592167501347426683
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5830360383721336400}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 6200000, guid: ed5ed3a8052a3d5408f67e93f0fecbbd, type: 2}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 0.33, y: 0.32}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &5830360383817333630
 GameObject:
   m_ObjectHideFlags: 0
@@ -236,7 +236,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5830360383817333630}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.3, z: 0}
+  m_LocalPosition: {x: 0, y: 0.474, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5830360383721336404}
