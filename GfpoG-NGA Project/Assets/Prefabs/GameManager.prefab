@@ -51,3 +51,5 @@ MonoBehaviour:
   m_CharacterPrefabs:
   - {fileID: 5830360383721336400, guid: 3d8b6183e933d6946bce2971b9ac5185, type: 3}
   - {fileID: 2898977568877546803, guid: 686c4cb4728cd8747bc0404ed0225e54, type: 3}
+  m_EventSystemPrefab: {fileID: 7752303057570838597, guid: d806866f99f8952418f1dc7e82259e8b,
+    type: 3}

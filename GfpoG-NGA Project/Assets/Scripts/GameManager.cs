@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] Canvas m_UIPrefab;             // The canvas for the ui
     [SerializeField] Canvas m_PauseMenuPrefab;      // The canvas for the pause menu
     [SerializeField] GameObject[] m_CharacterPrefabs;
+    [SerializeField] EventSystem m_EventSystemPrefab;     // The event system for the ui 
 
     private const string c_CharacterFolderLoad = "Assets";
 
@@ -101,6 +103,9 @@ public class GameManager : MonoBehaviour
 
         // give a main camera reference to the level controller
         m_LevelManager.m_Cam = cam.GetComponent<CameraMovement>();
+
+        // instantiate EventSystem for ui
+        Instantiate(m_EventSystemPrefab);
 
         // instantiate the ui elements
         m_UI = Instantiate(m_UIPrefab, m_level.transform);

@@ -11,8 +11,9 @@ public class LevelManager : MonoBehaviour
     // settings
     [SerializeField] private int m_TotalLives;                              // the amount of deaths before a reset                          
     [SerializeField] private GameObject m_SpawnPoint;                       // a GameObject positioned where the player will spawn
-    [SerializeField] private Tilemap m_CorpseMap;                           // the tilemap in which corpses will be places
+    [SerializeField] private GameObject m_SpawnZone;                        // The zone in which a character can be changed
 
+    [HideInInspector] public GameObject m_Corpses;                          // the GameObject the corpses will be childed to
     [HideInInspector] public Dropdown m_DudeSelectDropdown;                 // the dropdown menu that selects the next spawn
     [HideInInspector] public CameraMovement m_Cam;                          // the camera that will be attatched to the player
 
@@ -23,6 +24,9 @@ public class LevelManager : MonoBehaviour
     private CharacterController2D m_Player;                                 // the player
     private int m_CurrentLives;                                             // the amount of deaths still left
     private Tilemap m_TestMap;
+    private bool m_CanChangeCharacter = true;                               // true if the player is allowed to change his character
+    private bool m_HasFired = false;                                        // used to keep the dropdown from firing twice
+    private bool m_WasKilled = false;                                       // keeps track if the player was killed this round to avoid killing him twice
 
     // Start is called before the first frame update
     void Start()
@@ -36,18 +40,14 @@ public class LevelManager : MonoBehaviour
         SpawnPlayer();
        
         m_CurrentLives = m_TotalLives;
-
-        // add listener to dropdown
-        m_DudeSelectDropdown.onValueChanged.AddListener(delegate
-        {
-            SelectDude(m_DudeSelectDropdown);
-        });
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        // allow the dropdown to fire again
+        m_HasFired = false;
+        m_WasKilled = false;
     }
 
     private void SpawnPlayer()
@@ -57,23 +57,62 @@ public class LevelManager : MonoBehaviour
 
         // attatch the player to the Camera
         m_Cam.player = m_Player.gameObject;
+
+        // attatch the player transform to all objects that parallax
+        AssignPlayerToParralax();
+        Debug.Log("spawned player");
+    }
+
+    private void Respawn()
+    {
+        Destroy(m_Player.gameObject);
+        SpawnPlayer();
+        m_CanChangeCharacter = true;
     }
 
     // prepares everything needed in the scene
     private void PrepareScene()
     {
+        // add listener to dropdown
+        m_DudeSelectDropdown.onValueChanged.AddListener(delegate
+        {
+            SelectDude(m_DudeSelectDropdown);
+        });
+
+        // give spawnzone the event method
+        if (m_SpawnZone == null)
+        {
+            m_CanChangeCharacter = false;
+        }
+        else
+        {
+            m_SpawnZone.GetComponent<SpawnZone>().m_OnSpawnLeave = delegate { OnSpawnLeave(); };
+        }
+
+        // create game object for corpses and child it to level
+        m_Corpses = new GameObject("Corpses");
+        m_Corpses.transform.parent = gameObject.transform;
     }
 
     // Kills the player
-    public void KillPlayer(Tilemap map, Vector3Int tilePos)
+    public void KillPlayer(GameObject trap)
     {
+        // can't kill player twice in one frame
+        if (m_WasKilled)
+        {
+            return;
+        }
+
+        m_WasKilled = true;
+
         // destroy the kill source and regenerate Composite collider
-        map.SetTile(tilePos, null);
-        map.GetComponent<CompositeCollider2D>().GenerateGeometry();
+        Vector3 trappos = trap.transform.position;
+
+        // destroy the trap that killed the player
+        Destroy(trap);
 
         // place a corpse
-        m_CorpseMap.SetTile(tilePos, m_Player.corpse);
-        m_CorpseMap.GetComponent<CompositeCollider2D>().GenerateGeometry();
+        GameObject corpse = Instantiate(m_Player.GetComponent<CharacterController2D>().m_Corpse, trappos, Quaternion.identity, m_Corpses.transform);
 
         Debug.Log("Lives: " + m_CurrentLives);
 
@@ -84,12 +123,7 @@ public class LevelManager : MonoBehaviour
             m_CurrentLives -= 1;
 
             //Places the player at the spawnPoint. This very likely needs to redone once we get more characters.
-            // player.transform.position = spawnPoint.transform.position;
-
-            // switch character
-            // create a new Player instance and place it at the spawn point
-            Destroy(m_Player.gameObject);
-            SpawnPlayer();
+            Respawn();
         }
         else
         {
@@ -104,17 +138,46 @@ public class LevelManager : MonoBehaviour
         return m_Player;
     }
 
+    // assigns the current player to all objects that use the parallax script
+    private void AssignPlayerToParralax()
+    {
+        Parallax[] scripts = GetComponentsInChildren<Parallax>();
+        foreach (Parallax script in scripts)
+        {
+            script.m_Controller = m_Player.GetComponent<Transform>();
+            script.CaptureStartPos();
+        }
+    }
+
     // A new dude has been selected in the dropdown menu
     public void SelectDude(Dropdown change)
     {
+        // for some reason this can be fired twice. So here I check that it was the first time;
+        if (m_HasFired)
+        {
+            return;
+        }
+        m_HasFired = true;
+
+        Debug.Log("select dude");
         string option = change.captionText.text;
+        GameObject choice = null;
 
         foreach (GameObject character in m_CharacterPrefabs)
         {
             if (character.name == change.captionText.text)
             {
-                m_NextCharacter = character;
+                choice = character;
                 break;
+            }
+        }
+
+        if (choice != null)
+        {
+            m_NextCharacter = choice;
+            if (m_CanChangeCharacter)
+            {
+                Respawn();
             }
         }
     }
@@ -127,5 +190,12 @@ public class LevelManager : MonoBehaviour
     public int GetCurrLives()
     {
         return m_CurrentLives;
+    }
+
+    // called when the character leaves the spawn zone
+    public void OnSpawnLeave()
+    {
+        m_CanChangeCharacter = false;
+        Debug.Log("left spawn zone");
     }
 }
