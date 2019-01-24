@@ -6,13 +6,13 @@ using UnityEngine.Tilemaps;
 public class Spikes : MonoBehaviour
 {
     private Tilemap tilemap;
-    private LevelController level;
+    private LevelManager level;
 
     // Start is called before the first frame update
     void Start()
     {
         tilemap = GetComponent<Tilemap>();
-        level = GetComponentInParent<LevelController>();
+        level = GetComponentInParent<LevelManager>();
     }
 
     // Update is called once per frame

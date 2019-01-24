@@ -1,31 +1,59 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager s_instance = null;      //Static instance of GameManager which allows it to be accessed by any other script.
+
     // settings
-    [Range(0, 100)] [SerializeField] private int smoothFrames = 30;
-    [SerializeField] Canvas uiCanvas;
+    [Range(0, 100)] [SerializeField] private int m_SmoothFrames = 30;
+    [SerializeField] Canvas m_UIPrefab;             // The canvas for the ui
+    [SerializeField] Canvas m_PauseMenuPrefab;      // The canvas for the pause menu
+    [SerializeField] GameObject[] m_CharacterPrefabs;
+
+    private const string c_CharacterFolderLoad = "Assets";
 
     // variables
-
     // later on this should be a more general Gamestate variable
-    private bool paused = false;
+    private bool m_Paused = false;
 
     // for easing the pause process
-    private bool timeTrans = false;         // if the pause ease in process started
-    private float goalTime;                 // the goal of the time ease process
-    private float startTime;                // the time the ease in process starts with
+    private bool m_TimeTrans = false;           // if the pause ease in process started
+    private float m_GoalTime;                   // the goal of the time ease process
+    private float m_StartTime;                  // the time the ease in process starts with
+    private int m_DurrLevel = 1;                // the current level
+    private GameObject m_level;                 // the level current level
+    private LevelManager m_LevelManager;        // the level manager for the current level
+    private int t_time;
+    private Canvas m_UI;
+    private Canvas m_PauseMenu;
 
+    private void Awake()
+    {
+        //Check if instance already exists
+        if (s_instance == null)
 
-    private int time;
+            //if not, set instance to this
+            s_instance = this;
+
+        //If instance already exists and it's not this:
+        else if (s_instance != this)
+
+            //Then destroy this. This enforces our singleton pattern, meaning there can only ever be one instance of a GameManager.
+            Destroy(gameObject);
+
+        //Sets this to not be destroyed when reloading scene
+        DontDestroyOnLoad(gameObject);
+
+        InitGame();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        // disable ui
-        uiCanvas.enabled = false;
     }
 
     // Update is called once per frame
@@ -34,35 +62,85 @@ public class GameManager : MonoBehaviour
         // pausing starts
         if (Input.GetKeyDown("tab"))
         {
-            if (paused)
+            if (m_Paused)
             {
-                goalTime = 1f;
-                startTime = 0f;
+                m_GoalTime = 1f;
+                m_StartTime = 0f;
             } else
             {
-                goalTime = 0f;
-                startTime = 1f;
-                uiCanvas.enabled = true;
+                m_GoalTime = 0f;
+                m_StartTime = 1f;
+                m_PauseMenu.enabled = true;
             }
-            timeTrans = true;
-            time = 0;
+            m_TimeTrans = true;
+            t_time = 0;
         }
 
         // ease in the time stop
-        if (timeTrans)
+        if (m_TimeTrans)
         {
             EaseMenu();
         }
     }
 
+    // initializes the game for each level
+    private void InitGame()
+    {
+        m_level = GameObject.Find("Level");
+        if (m_level == null)
+        {
+            Debug.Log(gameObject.name + ": Failed to find Level");
+        }
+        m_LevelManager = m_level.GetComponent<LevelManager>();
+
+        // give the level manager a reference to this
+        m_LevelManager.m_GameManager = this;
+        // give the level the characters
+        m_LevelManager.m_CharacterPrefabs = m_CharacterPrefabs;
+        GameObject cam = GameObject.Find("Main Camera");
+
+        // give a main camera reference to the level controller
+        m_LevelManager.m_Cam = cam.GetComponent<CameraMovement>();
+
+        // instantiate the ui elements
+        m_UI = Instantiate(m_UIPrefab, m_level.transform);
+        m_PauseMenu = Instantiate(m_PauseMenuPrefab, m_level.transform);
+
+        // disable ui
+        m_PauseMenu.enabled = false;
+
+
+        Camera camera = cam.GetComponent<Camera>();
+        m_UI.worldCamera = camera;
+        m_PauseMenu.worldCamera = camera;
+
+        // add references to the ui
+        TextGetLives[] t_texts = m_UI.GetComponentsInChildren<TextGetLives>();
+        foreach (TextGetLives text in t_texts)
+        {
+            text.m_LevelObject = m_level;
+        }
+        NextCharacterImage t_img = m_UI.GetComponentInChildren<NextCharacterImage>();
+        t_img.m_levelObject = m_level;
+
+        Dropdown t_dropdown = m_PauseMenu.GetComponentInChildren<Dropdown>();
+        m_LevelManager.m_DudeSelectDropdown = t_dropdown;
+
+        t_dropdown.onValueChanged.AddListener(delegate { m_LevelManager.SelectDude(t_dropdown); });
+
+        Button t_button = m_PauseMenu.GetComponentInChildren<Button>();
+        t_button.onClick.AddListener(delegate { this.ReloadScene(); });
+        
+    }
+
     private void EaseMenu()
     {
         // linear easing formula to fade in the menu and fade out time.
-        time += 1;
-        float newTime = (goalTime - startTime) / smoothFrames * time + startTime;
+        t_time += 1;
+        float newTime = (m_GoalTime - m_StartTime) / m_SmoothFrames * t_time + m_StartTime;
         Time.timeScale = newTime;
 
-        RectTransform[] rects = uiCanvas.GetComponentsInChildren<RectTransform>();
+        RectTransform[] rects = m_PauseMenu.GetComponentsInChildren<RectTransform>();
         foreach (RectTransform rect in rects)
         {
             rect.localScale = new Vector3(1f + 0.5f * Mathf.Sin(newTime * Mathf.PI * 0.5f), 1f - newTime, 1f);
@@ -72,23 +150,43 @@ public class GameManager : MonoBehaviour
         // easing is complete and the game is stopped
         if (newTime == 1f || newTime == 0f)
         {
-            timeTrans = false;
+            m_TimeTrans = false;
             TogglePause();
         }
     }
 
     private void TogglePause()
     {
-        if (paused)
+        if (m_Paused)
         {
             Debug.Log("unpaused");
-            paused = false;
+            m_Paused = false;
             // disable ui
-            uiCanvas.enabled = false;
+            m_PauseMenu.enabled = false;
         } else
         {
             Debug.Log("paused");
-            paused = true; 
+            m_Paused = true; 
         }
+    }
+
+    // inits the game after scene was loaded
+    private void OnLevelWasLoaded(int level)
+    {
+        InitGame();
+    }
+
+    // reloads the scene
+    public void ReloadScene()
+    {
+        // unpause if paused
+        if (m_Paused)
+        {
+            m_Paused = false;
+            Time.timeScale = 1f;
+        }
+
+        // reload the scene
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
