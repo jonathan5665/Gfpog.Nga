@@ -49,6 +49,9 @@ public class CharacterController2D : MonoBehaviour
 
         if (OnCrouchEvent == null)
             OnCrouchEvent = new BoolEvent();
+
+        int playerLayerId = LayerMask.NameToLayer("Player");
+        Physics2D.IgnoreLayerCollision(playerLayerId, playerLayerId);
     }
 
     private void FixedUpdate()
@@ -136,13 +139,13 @@ public class CharacterController2D : MonoBehaviour
             if (move > 0 && !m_FacingRight)
             {
                 // ... flip the player.
-                Flip();
+                // Flip();
             }
             // Otherwise if the input is moving the player left and the player is facing right...
             else if (move < 0 && m_FacingRight)
             {
                 // ... flip the player.
-                Flip();
+                // Flip();
             }
         }
 
