@@ -50,7 +50,8 @@ public class LevelManager : MonoBehaviour
         if (m_SpawnZone == null)
         {
             m_CanChangeCharacter = false;
-        } else
+        }
+        else
         {
             m_SpawnZone.GetComponent<SpawnZone>().m_OnSpawnLeave = delegate { OnSpawnLeave(); };
         }
@@ -71,6 +72,8 @@ public class LevelManager : MonoBehaviour
         // attatch the player to the Camera
         m_Cam.player = m_Player.gameObject;
 
+        // attatch the player transform to all objects that parallax
+        AssignPlayerToParralax();
         Debug.Log("spawned player");
     }
 
@@ -119,6 +122,17 @@ public class LevelManager : MonoBehaviour
     public CharacterController2D GetPlayer()
     {
         return m_Player;
+    }
+
+    // assigns the current player to all objects that use the parallax script
+    private void AssignPlayerToParralax()
+    {
+        Parallax[] scripts = GetComponentsInChildren<Parallax>();
+        foreach (Parallax script in scripts)
+        {
+            script.m_Controller = m_Player.GetComponent<Transform>();
+            script.CaptureStartPos();
+        }
     }
 
     // A new dude has been selected in the dropdown menu
