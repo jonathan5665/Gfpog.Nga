@@ -24,8 +24,11 @@ public class FatCorpse : MonoBehaviour
             return;
         }
         Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
-        Debug.Log(collision.gameObject.name);
-        rb.AddForce(new Vector2(0f, m_FatCorpseForce));
+
+        // the normal on the player in the direction of the collision
+        Vector3 surfaceNormal = collision.GetContact(0).normal;
+
+        rb.AddForce(surfaceNormal * -1 * m_FatCorpseForce);
         // no extra jumping on these
         player.DenyJump();
 
