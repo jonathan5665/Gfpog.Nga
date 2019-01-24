@@ -28,6 +28,7 @@ public class CorpseInterface : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log("collision");
         // get the player
         CharacterController2D player = collision.gameObject.GetComponent<CharacterController2D>();
         if (player == null)
