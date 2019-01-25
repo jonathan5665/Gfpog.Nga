@@ -54,9 +54,6 @@ public class CharacterController2D : MonoBehaviour
 
         if (OnCrouchEvent == null)
             OnCrouchEvent = new BoolEvent();
-
-        int playerLayerId = LayerMask.NameToLayer("Player");
-        Physics2D.IgnoreLayerCollision(playerLayerId, playerLayerId);
     }
 
     private void FixedUpdate()

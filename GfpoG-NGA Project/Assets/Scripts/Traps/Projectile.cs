@@ -15,6 +15,14 @@ public class Projectile : MonoBehaviour
         m_Collider = gameObject.GetComponent<Collider2D>();
     }
 
+    private void Update()
+    {
+        if (m_Level.m_LevelState == LevelManager.LevelState.RespawnAnimation)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         CharacterController2D player = collision.gameObject.GetComponent<CharacterController2D>();
@@ -24,7 +32,7 @@ public class Projectile : MonoBehaviour
             m_Level.KillPlayer(gameObject);
         }
         // destroy this after half a second
-        Destroy(gameObject, 0.5f);
+        Destroy(gameObject, 0.1f);
     }
 
     public void Whitelist(GameObject otherObject)

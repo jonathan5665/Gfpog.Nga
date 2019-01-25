@@ -57,6 +57,7 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         InitGame();
+
     }
 
     // Start is called before the first frame update
