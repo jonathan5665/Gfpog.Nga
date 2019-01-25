@@ -25,8 +25,11 @@ public class FatCorpse : MonoBehaviour
         }
         Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
 
-        // the normal on the player in the direction of the collision
-        Vector3 surfaceNormal = collision.GetContact(0).normal;
+        // the normal on this object in the direction of the collision. We can't get the normal of the collision because that would be the players normal.
+        ContactPoint2D[] contacts = new ContactPoint2D[collision.contactCount];
+        collision.otherCollider.GetContacts(contacts);
+        Vector3 surfaceNormal = contacts[0].normal;
+        Debug.Log("Collision Normal " + surfaceNormal);
 
         rb.AddForce(surfaceNormal * -1 * m_FatCorpseForce);
         // no extra jumping on these
