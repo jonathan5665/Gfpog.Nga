@@ -250,6 +250,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: SpriteFollower
       objectReference: {fileID: 0}
+    - target: {fileID: 6073441254256471930, guid: 8fbabc02fc78cf942964cf8ad74105a4,
+        type: 3}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 6073441254256471933, guid: 8fbabc02fc78cf942964cf8ad74105a4,
         type: 3}
       propertyPath: m_LocalPosition.x

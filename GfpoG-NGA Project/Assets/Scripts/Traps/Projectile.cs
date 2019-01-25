@@ -15,12 +15,13 @@ public class Projectile : MonoBehaviour
         m_Collider = gameObject.GetComponent<Collider2D>();
     }
 
+    private void Start()
+    {
+        m_Level.OnSpawnEvent.AddListener(DestroyThis);
+    }
+
     private void Update()
     {
-        if (m_Level.m_LevelState == LevelManager.LevelState.RespawnAnimation)
-        {
-            Destroy(gameObject);
-        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -49,5 +50,10 @@ public class Projectile : MonoBehaviour
     public void SetLevel(LevelManager level)
     {
         m_Level = level;
+    }
+    
+    private void DestroyThis()
+    {
+        Destroy(gameObject);
     }
 }

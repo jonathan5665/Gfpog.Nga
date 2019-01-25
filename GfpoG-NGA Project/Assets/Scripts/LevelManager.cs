@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+using UnityEngine.Events;   
 
 // Manages The Levels
 public class LevelManager : MonoBehaviour
@@ -13,11 +14,13 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GameObject m_SpawnPoint;                       // a GameObject positioned where the player will spawn
     [SerializeField] private GameObject m_SpawnZone;                        // The zone in which a character can be changed
     [SerializeField] private float m_MinRagdolVel = 1f;                     // velocity at which ragdolling ends
-    [Range(30, 100)] [SerializeField] private float m_CameraPanSpeed = 100f;                   // The speed for the death animation
 
     [HideInInspector] public GameObject m_Corpses;                          // the GameObject the corpses will be childed to
     [HideInInspector] public Dropdown m_DudeSelectDropdown;                 // the dropdown menu that selects the next spawn
     [HideInInspector] public CameraMovement m_Cam;                          // the camera that will be attatched to the player
+
+    public UnityEvent OnSpawnEvent;                                         // Gets called when the player is respawned      
+    public UnityEvent OnRagdollEvent;                                            // When ragdoll state is enabled
 
     // the current state of the level / gameplay in the level
     public enum LevelState { Playing, Ragdoll, RespawnAnimation };
@@ -33,6 +36,12 @@ public class LevelManager : MonoBehaviour
     private bool m_CanChangeCharacter = true;                               // true if the player is allowed to change his character
     private bool m_HasFired = false;                                        // used to keep the dropdown from firing twice
     private bool m_IsPlayerDead = false;                                    // keeps track if the player was killed this round to avoid killing him twice
+
+    private void Awake()
+    {
+        OnSpawnEvent = new UnityEvent();
+        OnRagdollEvent = new UnityEvent();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -59,7 +68,7 @@ public class LevelManager : MonoBehaviour
             LeaveCorpse();
             DestoryPlayer();
             m_LevelState = LevelState.RespawnAnimation;
-            m_Cam.DeathAnimation(m_CameraPanSpeed, m_SpawnPoint.transform.position);
+            m_Cam.InitDeathAnimation(m_SpawnPoint.transform.position);
         } else if (m_LevelState == LevelState.RespawnAnimation)
         {
             // make respawn animation (move camera)
@@ -97,6 +106,7 @@ public class LevelManager : MonoBehaviour
         m_IsPlayerDead = false;
         GameManager.IsInputEnabled = true;
         m_CanChangeCharacter = true;
+        OnSpawnEvent.Invoke();
     }
 
     private void DestoryPlayer()
