@@ -15,11 +15,15 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private Transform m_GroundCheck;                           // A position marking where to check if the player is grounded.
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
+    [Range(-1000, 1000)] [SerializeField] private float m_RagdollTorque = 500f;
+
+    [SerializeField] private PhysicsMaterial2D m_RagdollMaterial;                // The material used for ragdolling
+
     public GameObject m_Corpse;                                                 //This character's corpse
 
     public bool IsTouchingSpikes = false;
 
-    const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
+    const float m_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
     private bool m_Grounded;            // Whether or not the player is grounded.
     const float k_CeilingRadius = .2f; // Radius of the overlap circle to determine if the player can stand up
     private Rigidbody2D m_Rigidbody2D;
@@ -62,7 +66,7 @@ public class CharacterController2D : MonoBehaviour
 
         // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
         // This can be done using layers instead but Sample Assets will not overwrite your project settings.
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, m_GroundedRadius, m_WhatIsGround);
         for (int i = 0; i < colliders.Length; i++)
         {
             if (colliders[i].gameObject != gameObject)
@@ -201,5 +205,11 @@ public class CharacterController2D : MonoBehaviour
     public bool IsGrouned()
     {
         return m_Grounded;
+    }
+
+    public void StartRagdoll()
+    {
+        gameObject.GetComponent<Collider2D>().sharedMaterial = m_RagdollMaterial;
+        gameObject.transform.Find("SpriteFollower").GetComponent<Rigidbody2D>().AddTorque(m_RagdollTorque);
     }
 }

@@ -30,7 +30,6 @@ public class FatCorpse : MonoBehaviour
         ContactPoint2D[] contacts = new ContactPoint2D[collision.contactCount];
         collision.otherCollider.GetContacts(contacts);
         Vector3 surfaceNormal = contacts[0].normal;
-        Debug.Log("Collision Normal " + surfaceNormal);
 
         rb.AddForce(surfaceNormal * -1 * m_FatCorpseForce);
         // no extra jumping on these

@@ -5,7 +5,7 @@ using UnityEngine;
 public class Spiketrap : MonoBehaviour
 {
     // settings
-    [Range(0, 50)] [SerializeField] private float m_Friction = 1f;        // the magnitude of tangential friction;
+    [Range(0, 50)] [SerializeField] private float m_Friction = 10f;        // the magnitude of tangential friction;
 
     private LevelManager m_Level;       // the level so that it can be told to kill the player
     private Rigidbody2D m_PlayerRb;     // the ridgid body of the player

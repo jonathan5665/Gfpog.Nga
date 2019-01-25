@@ -139,7 +139,7 @@ public class LevelManager : MonoBehaviour
     {
         m_IsPlayerDead = true;
         m_LevelState = LevelState.Ragdoll;
-        // m_Player.gameObject.GetComponent<Rigidbody2D>().gravityScale = 0;
+        m_Player.StartRagdoll();
         GameManager.IsInputEnabled = false;
         return;
     }
@@ -232,6 +232,5 @@ public class LevelManager : MonoBehaviour
     public void OnSpawnLeave()
     {
         m_CanChangeCharacter = false;
-        Debug.Log("left spawn zone");
     }
 }

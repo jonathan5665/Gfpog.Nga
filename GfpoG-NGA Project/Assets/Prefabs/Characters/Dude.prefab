@@ -149,8 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9e8a332c0792064eb89a6da73124666, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  runSpeed: 40
-  controller: {fileID: 7906783103442515105}
+  m_RunSpeed: 40
 --- !u!114 &7906783103442515105
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176,8 +175,10 @@ MonoBehaviour:
   m_GroundCheck: {fileID: 5830360382582689921}
   m_CeilingCheck: {fileID: 5830360383817333631}
   m_CrouchDisableCollider: {fileID: 0}
+  m_RagdollMaterial: {fileID: 6200000, guid: 541b71fa63f065245a41eeb5a3805435, type: 2}
   m_Corpse: {fileID: 4676977521288398997, guid: 38487e22874445c48badbd3ab2605286,
     type: 3}
+  IsTouchingSpikes: 0
   OnLandEvent:
     m_PersistentCalls:
       m_Calls: []
