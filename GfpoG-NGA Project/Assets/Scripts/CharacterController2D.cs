@@ -74,11 +74,10 @@ public class CharacterController2D : MonoBehaviour
                 if (!wasGrounded)
                 {
                     OnLandEvent.Invoke();
-                    // Reset canJump if the jump button is not pressed and the character is grounded
-                        canJump = true;
                 }
             }
         }
+
         if (addTorque && Time.timeSinceLevelLoad < torqueTime)
         {
             
@@ -94,9 +93,9 @@ public class CharacterController2D : MonoBehaviour
             }
         }
     }
+
     void Update()
     {
-     
     }
 
     public void Move(float move, bool crouch, bool jump)
@@ -195,16 +194,25 @@ public class CharacterController2D : MonoBehaviour
                 m_Rigidbody2D.gravityScale = playerGravity * m_LowJumpMul;
             }
         }
+
+
+        // Reset jump ability if you release space bar
+        if (!jump)
+        {
+            canJump = true;
+        }
     }
 
     private void Jump()
     {
+        Debug.Log("Jump");
         // Add a vertical force to the player.
         m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
         canJump = false;
         addTorque = true;
         torqueTime = Time.timeSinceLevelLoad + m_TorqueTime;
     }
+
     private void Flip()
     {
         // Switch the way the player is labelled as facing.
@@ -214,12 +222,6 @@ public class CharacterController2D : MonoBehaviour
         Vector3 theScale = transform.localScale;
         theScale.x *= -1;
         transform.localScale = theScale;
-    }
-
-    // denies the jump in the next frame
-    public void DenyJump()
-    {
-        canJump = false;
     }
 
     public bool IsGrouned()

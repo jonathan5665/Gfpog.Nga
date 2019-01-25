@@ -32,8 +32,6 @@ public class FatCorpse : MonoBehaviour
         Vector3 surfaceNormal = contacts[0].normal;
 
         rb.AddForce(surfaceNormal * -1 * m_FatCorpseForce);
-        // no extra jumping on these
-        player.DenyJump();
 
         // set time for next activation
         m_NextTime = Time.time + m_TimeoutMS / 1000;
