@@ -34,6 +34,7 @@ public class CharacterController2D : MonoBehaviour
     private bool canJump = true;    // can the character jump again
     private bool addTorque = false; // Do we want to spin
     private float torqueTime;
+    private Vector2 m_LastFrameVelocity; // the velocity during the last frame.
     [Header("Events")]
     [Space]
 
@@ -60,6 +61,9 @@ public class CharacterController2D : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // store last frame veolicty for later
+        m_LastFrameVelocity = m_Rigidbody2D.velocity;
+
         bool wasGrounded = m_Grounded;
         m_Grounded = false;
 
@@ -233,5 +237,10 @@ public class CharacterController2D : MonoBehaviour
     {
         gameObject.GetComponent<Collider2D>().sharedMaterial = m_RagdollMaterial;
         gameObject.transform.Find("SpriteFollower").GetComponent<Rigidbody2D>().AddTorque(m_RagdollTorque);
+    }
+
+    public Vector2 GetLastFrameVelocity()
+    {
+        return m_LastFrameVelocity;
     }
 }

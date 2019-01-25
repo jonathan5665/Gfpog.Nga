@@ -175,7 +175,7 @@ MonoBehaviour:
   m_GroundCheck: {fileID: 5830360382582689921}
   m_CeilingCheck: {fileID: 5830360383817333631}
   m_CrouchDisableCollider: {fileID: 0}
-  m_RagdollTorque: 500
+  m_RagdollTorque: 250
   m_JumpTorque: 10
   m_TorqueTime: 0.5
   m_RagdollMaterial: {fileID: 6200000, guid: 541b71fa63f065245a41eeb5a3805435, type: 2}
@@ -245,6 +245,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5830360383721336404}
     m_Modifications:
+    - target: {fileID: 6073441254256471930, guid: 8fbabc02fc78cf942964cf8ad74105a4,
+        type: 3}
+      propertyPath: m_Name
+      value: SpriteFollower
+      objectReference: {fileID: 0}
     - target: {fileID: 6073441254256471933, guid: 8fbabc02fc78cf942964cf8ad74105a4,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -309,11 +314,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.y
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6073441254256471930, guid: 8fbabc02fc78cf942964cf8ad74105a4,
-        type: 3}
-      propertyPath: m_Name
-      value: SpriteFollower
       objectReference: {fileID: 0}
     - target: {fileID: 6073441254256471935, guid: 8fbabc02fc78cf942964cf8ad74105a4,
         type: 3}

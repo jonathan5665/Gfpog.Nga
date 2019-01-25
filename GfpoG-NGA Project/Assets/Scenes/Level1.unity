@@ -7897,7 +7897,7 @@ MonoBehaviour:
   m_SpawnPoint: {fileID: 1582086388}
   m_SpawnZone: {fileID: 1901943459}
   m_MinRagdolVel: 1
-  m_CameraPanSpeed: 100
+  m_CameraPanSpeed: 50
   m_Corpses: {fileID: 0}
   m_DudeSelectDropdown: {fileID: 0}
   m_Cam: {fileID: 0}
