@@ -16,9 +16,10 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
     [Range(-1000, 1000)] [SerializeField] private float m_RagdollTorque = 500f;
-
+    [Range(-10, 10)] [SerializeField] private float m_JumpTorque = 1f;
+    [Range(0, 1)] [SerializeField] private float m_TorqueTime = 0.5f;
     [SerializeField] private PhysicsMaterial2D m_RagdollMaterial;                // The material used for ragdolling
-
+    private float m_TorqueThresh = 2.5f;
     public GameObject m_Corpse;                                                 //This character's corpse
 
     public bool IsTouchingSpikes = false;
@@ -31,7 +32,8 @@ public class CharacterController2D : MonoBehaviour
     private Vector3 m_Velocity = Vector3.zero;
     private float playerGravity = 3f;  // for storing the original player gravity
     private bool canJump = true;    // can the character jump again
-
+    private bool addTorque = false; // Do we want to spin
+    private float torqueTime;
     [Header("Events")]
     [Space]
 
@@ -70,11 +72,32 @@ public class CharacterController2D : MonoBehaviour
             {
                 m_Grounded = true;
                 if (!wasGrounded)
+                {
                     OnLandEvent.Invoke();
+                    // Reset canJump if the jump button is not pressed and the character is grounded
+                        canJump = true;
+                }
+            }
+        }
+        if (addTorque && Time.timeSinceLevelLoad < torqueTime)
+        {
+            
+            //Adds Torque To The SpriteFollower
+            if (Mathf.Abs(m_Rigidbody2D.velocity.x) > m_TorqueThresh)
+            {
+                int Multi = 1;
+                if (m_Rigidbody2D.velocity.x > 0)
+                {
+                    Multi = -1;
+                }
+                gameObject.transform.Find("SpriteFollower").GetComponent<Rigidbody2D>().AddTorque(m_JumpTorque * Multi);
             }
         }
     }
-
+    void Update()
+    {
+     
+    }
 
     public void Move(float move, bool crouch, bool jump)
     {
@@ -154,14 +177,13 @@ public class CharacterController2D : MonoBehaviour
         // If the player should jump...
         if (m_Grounded && jump && canJump)
         {
-            // Add a vertical force to the player.
-            m_Grounded = false;
-            m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
-            canJump = false;
+            Jump();   
         }
 
         // If not grounded and not jumping increase Gravity
         m_Rigidbody2D.gravityScale = playerGravity;
+        if (!m_Grounded)
+        if (!m_Grounded)
         if (!m_Grounded)
         {
             if (m_Rigidbody2D.velocity.y < 0)  // going downwards
@@ -173,15 +195,16 @@ public class CharacterController2D : MonoBehaviour
                 m_Rigidbody2D.gravityScale = playerGravity * m_LowJumpMul;
             }
         }
-
-        // Reset canJump if the jump button is not pressed and the character is grounded
-        if (!jump)
-        {
-            canJump = true;
-        }
     }
 
-
+    private void Jump()
+    {
+        // Add a vertical force to the player.
+        m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+        canJump = false;
+        addTorque = true;
+        torqueTime = Time.timeSinceLevelLoad + m_TorqueTime;
+    }
     private void Flip()
     {
         // Switch the way the player is labelled as facing.
