@@ -1324,6 +1324,8 @@ MonoBehaviour:
       m_Image: {fileID: 21300000, guid: f8aac0c3ad3af1241940a43e5bbf521f, type: 3}
     - m_Text: DudeFat
       m_Image: {fileID: 21300000, guid: 61fc839e9d8eebd428d6c16079449868, type: 3}
+    - m_Text: DudeDynamic
+      m_Image: {fileID: 21300000, guid: 61fc839e9d8eebd428d6c16079449868, type: 3}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
