@@ -20,7 +20,10 @@ public class GameManager : MonoBehaviour
 
     // variables
     // later on this should be a more general Gamestate variable
-    private bool m_Paused = false;
+    public enum Gamestate { Playing, Paused};
+
+    public static Gamestate m_Gamestate = Gamestate.Playing;
+
 
     // for easing the pause process
     private bool m_TimeTrans = false;           // if the pause ease in process started
@@ -32,6 +35,9 @@ public class GameManager : MonoBehaviour
     private int t_time;
     private Canvas m_UI;
     private Canvas m_PauseMenu;
+
+    // settings for the game
+    public static bool IsInputEnabled = true;   // if player input is enabled
 
     private void Awake()
     {
@@ -64,7 +70,7 @@ public class GameManager : MonoBehaviour
         // pausing starts
         if (Input.GetKeyDown("tab"))
         {
-            if (m_Paused)
+            if (m_Gamestate == Gamestate.Paused)
             {
                 m_GoalTime = 1f;
                 m_StartTime = 0f;
@@ -162,16 +168,16 @@ public class GameManager : MonoBehaviour
 
     private void TogglePause()
     {
-        if (m_Paused)
+        if (m_Gamestate == Gamestate.Paused)
         {
             Debug.Log("unpaused");
-            m_Paused = false;
+            m_Gamestate = Gamestate.Playing;
             // disable ui
             m_PauseMenu.enabled = false;
         } else
         {
             Debug.Log("paused");
-            m_Paused = true; 
+            m_Gamestate = Gamestate.Paused;
         }
     }
 
@@ -185,11 +191,8 @@ public class GameManager : MonoBehaviour
     public void ReloadScene()
     {
         // unpause if paused
-        if (m_Paused)
-        {
-            m_Paused = false;
-            Time.timeScale = 1f;
-        }
+        Time.timeScale = 1f;
+        m_Gamestate = Gamestate.Playing;
 
         // reload the scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

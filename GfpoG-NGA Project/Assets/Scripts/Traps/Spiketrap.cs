@@ -4,17 +4,27 @@ using UnityEngine;
 
 public class Spiketrap : MonoBehaviour
 {
-    private LevelManager level;
+    // settings
+    [Range(0, 50)] [SerializeField] private float m_Friction = 1f;        // the magnitude of tangential friction;
+
+    private LevelManager m_Level;       // the level so that it can be told to kill the player
+    private Rigidbody2D m_PlayerRb;     // the ridgid body of the player
 
     // Start is called before the first frame update
     void Start()
     {
-        level = GetComponentInParent<LevelManager>();
+        m_Level = GetComponentInParent<LevelManager>();
     }
 
-    // OnCollisionStay instead of OnCollisionEnter because OnCollisionStay does not get triggered if a new Tile is collided with if already collided with another tile.
-    // Also This will not trigger on the first frame of entering a collision which gives the character time to get grounded.
-    private void OnCollisionStay2D(Collision2D collision)
+    private void FixedUpdate()
+    {
+        if (m_PlayerRb != null)
+        {
+            SlowPlayer();
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         // get the player
         CharacterController2D player = collision.gameObject.GetComponent<CharacterController2D>();
@@ -23,18 +33,29 @@ public class Spiketrap : MonoBehaviour
             return;  // only do something if colliding with a player
         }
 
-        // the normal on the player in the direction of the collision
-        Vector3 surfaceNormal = collision.GetContact(0).normal;
+        player.IsTouchingSpikes = true;
 
-        // don't do anything if player on top and grounded
-        if (surfaceNormal.y == -1 && player.IsGrouned())
+        m_PlayerRb = collision.gameObject.GetComponent<Rigidbody2D>();
+        m_Level.KillPlayer(gameObject);
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        // get the player
+        CharacterController2D player = collision.gameObject.GetComponent<CharacterController2D>();
+        if (player == null)
         {
-            return;
+            return;  // only do something if colliding with a player
         }
+        player.IsTouchingSpikes = false;
 
-        Debug.Log(level);
-        Debug.Log(gameObject);
+        m_PlayerRb = null;
 
-        level.KillPlayer(gameObject);
+    }
+
+    // slow the player in some way
+    private void SlowPlayer()
+    {
+        m_PlayerRb.AddForce(m_PlayerRb.velocity.normalized * -1 * m_Friction);
     }
 }

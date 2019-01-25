@@ -23,6 +23,7 @@ public class FatCorpse : MonoBehaviour
         {
             return;
         }
+
         Rigidbody2D rb = collision.gameObject.GetComponent<Rigidbody2D>();
 
         // the normal on this object in the direction of the collision. We can't get the normal of the collision because that would be the players normal.

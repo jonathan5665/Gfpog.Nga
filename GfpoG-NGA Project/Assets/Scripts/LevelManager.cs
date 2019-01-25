@@ -12,10 +12,16 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int m_TotalLives;                              // the amount of deaths before a reset                          
     [SerializeField] private GameObject m_SpawnPoint;                       // a GameObject positioned where the player will spawn
     [SerializeField] private GameObject m_SpawnZone;                        // The zone in which a character can be changed
+    [SerializeField] private float m_MinRagdolVel = 1f;                     // velocity at which ragdolling ends
+    [Range(30, 100)] [SerializeField] private float m_CameraPanSpeed = 100f;                   // The speed for the death animation
 
     [HideInInspector] public GameObject m_Corpses;                          // the GameObject the corpses will be childed to
     [HideInInspector] public Dropdown m_DudeSelectDropdown;                 // the dropdown menu that selects the next spawn
     [HideInInspector] public CameraMovement m_Cam;                          // the camera that will be attatched to the player
+
+    // the current state of the level / gameplay in the level
+    public enum LevelState { Playing, Ragdoll, RespawnAnimation };
+    public LevelState m_LevelState = LevelState.Playing;
 
     // variables
     [HideInInspector] public GameObject[] m_CharacterPrefabs;               // the available character prefabs
@@ -26,7 +32,7 @@ public class LevelManager : MonoBehaviour
     private Tilemap m_TestMap;
     private bool m_CanChangeCharacter = true;                               // true if the player is allowed to change his character
     private bool m_HasFired = false;                                        // used to keep the dropdown from firing twice
-    private bool m_WasKilled = false;                                       // keeps track if the player was killed this round to avoid killing him twice
+    private bool m_IsPlayerDead = false;                                    // keeps track if the player was killed this round to avoid killing him twice
 
     // Start is called before the first frame update
     void Start()
@@ -47,7 +53,33 @@ public class LevelManager : MonoBehaviour
     {
         // allow the dropdown to fire again
         m_HasFired = false;
-        m_WasKilled = false;
+
+        if (m_IsPlayerDead && HasRagdollEnded())
+        {
+            LeaveCorpse();
+            DestoryPlayer();
+            m_LevelState = LevelState.RespawnAnimation;
+            m_Cam.DeathAnimation(m_CameraPanSpeed, m_SpawnPoint.transform.position);
+        } else if (m_LevelState == LevelState.RespawnAnimation)
+        {
+            // make respawn animation (move camera)
+            if (m_Cam.IsAnimationDone())
+            {
+                SpawnPlayer();
+                m_LevelState = LevelState.Playing;
+            }
+        }
+    }
+
+    private bool HasRagdollEnded()
+    {
+        // check if ragdoll has ended
+        bool slowed = m_Player.gameObject.GetComponent<Rigidbody2D>().velocity.magnitude < m_MinRagdolVel;
+        if (slowed && (m_Player.IsGrouned() || m_Player.IsTouchingSpikes))
+        {
+            return true;
+        }
+        return false;
     }
 
     private void SpawnPlayer()
@@ -61,13 +93,21 @@ public class LevelManager : MonoBehaviour
         // attatch the player transform to all objects that parallax
         AssignPlayerToParralax();
         Debug.Log("spawned player");
+
+        m_IsPlayerDead = false;
+        GameManager.IsInputEnabled = true;
+        m_CanChangeCharacter = true;
+    }
+
+    private void DestoryPlayer()
+    {
+        Destroy(m_Player.gameObject);
     }
 
     private void Respawn()
     {
-        Destroy(m_Player.gameObject);
+        DestoryPlayer();
         SpawnPlayer();
-        m_CanChangeCharacter = true;
     }
 
     // prepares everything needed in the scene
@@ -97,22 +137,18 @@ public class LevelManager : MonoBehaviour
     // Kills the player
     public void KillPlayer(GameObject trap)
     {
-        // can't kill player twice in one frame
-        if (m_WasKilled)
-        {
-            return;
-        }
+        m_IsPlayerDead = true;
+        m_LevelState = LevelState.Ragdoll;
+        // m_Player.gameObject.GetComponent<Rigidbody2D>().gravityScale = 0;
+        GameManager.IsInputEnabled = false;
+        return;
+    }
 
-        m_WasKilled = true;
-
-        // destroy the kill source and regenerate Composite collider
-        Vector3 trappos = trap.transform.position;
-
-        // destroy the trap that killed the player
-        Destroy(trap);
-
+    // will be called at the end of the ragdol
+    private void LeaveCorpse()
+    {
         // place a corpse
-        GameObject corpse = Instantiate(m_Player.GetComponent<CharacterController2D>().m_Corpse, trappos, Quaternion.identity, m_Corpses.transform);
+        GameObject corpse = Instantiate(m_Player.GetComponent<CharacterController2D>().m_Corpse, m_Player.gameObject.transform.position, Quaternion.identity, m_Corpses.transform);
 
         Debug.Log("Lives: " + m_CurrentLives);
 
