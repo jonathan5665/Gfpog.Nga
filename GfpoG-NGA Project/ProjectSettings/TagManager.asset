@@ -16,8 +16,8 @@ TagManager:
   - Player
   - Ground
   - Background
-  - 
-  - 
+  - HiddenTriggers
+  - VisualsOnly
   - 
   - 
   - 

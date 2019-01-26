@@ -3,22 +3,56 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 // Manages The Levels
 public class LevelManager : MonoBehaviour
 {
 
     // settings
-    [SerializeField] private int m_TotalLives;                              // the amount of deaths before a reset                          
-    [SerializeField] private GameObject m_SpawnPoint;                       // a GameObject positioned where the player will spawn
-    [SerializeField] private GameObject m_SpawnZone;                        // The zone in which a character can be changed
+    [SerializeField] private int m_TotalLives;                                  // the amount of deaths before a reset                          
+    [SerializeField] private GameObject m_SpawnPoint;                           // a GameObject positioned where the player will spawn
+    [SerializeField] private GameObject m_SpawnZone;                            // The zone in which a character can be changed
+    [SerializeField] private float m_MinRagdolVel = 1f;                         // velocity at which ragdolling ends
+    [Range(0, 0.5f)] [SerializeField] private float m_PauseMenuEaseTime = 0.1f; // the time for the start menu to ease in
+    [SerializeField] GameObject[] m_CharacterPrefabs;                           // The Charcters available in the game
+    [Range(0, 2)] [SerializeField] private float m_PauseMenuSlide = 1f;         // The amount the pause menu slides up when paused
+
+    // The settings for the pause menu ease
+    private struct PauseMenuEase
+    {
+        public bool IsFinished;             // true if ease is finished
+        public float StartTime;             // the time the ease starts
+        public float Duration;              // the time the ease takes
+        public bool IsEasingIn;             // a variable to check if we are easing in our out of the pause menu
+        public float StartValue;
+
+        public PauseMenuEase(bool isFinished, float startTime, float easeTime, bool isEasingIn, float startValue)
+        {
+            IsFinished = isFinished;
+            StartTime = startTime;
+            Duration = easeTime;
+            IsEasingIn = isEasingIn;
+            StartValue = startValue;
+        }
+    }
+
+    private PauseMenuEase m_PauseMenuEase;
 
     [HideInInspector] public GameObject m_Corpses;                          // the GameObject the corpses will be childed to
     [HideInInspector] public Dropdown m_DudeSelectDropdown;                 // the dropdown menu that selects the next spawn
     [HideInInspector] public CameraMovement m_Cam;                          // the camera that will be attatched to the player
 
+    private Canvas m_PauseMenu;                                             // The canvas for the pause menu
+
+    public UnityEvent OnSpawnEvent;                                         // Gets called when the player is respawned      
+    public UnityEvent OnRagdollEvent;                                       // When ragdoll state is enabled
+
+    // the current state of the level / gameplay in the level
+    public enum LevelState { Playing, Ragdoll, RespawnAnimation, PauseMenu };
+    public LevelState m_LevelState = LevelState.Playing;
+
     // variables
-    [HideInInspector] public GameObject[] m_CharacterPrefabs;               // the available character prefabs
     [HideInInspector] public GameManager m_GameManager;                     // the game manager
     private GameObject m_NextCharacter;                                     // the character that will be spawned
     private CharacterController2D m_Player;                                 // the player
@@ -26,11 +60,28 @@ public class LevelManager : MonoBehaviour
     private Tilemap m_TestMap;
     private bool m_CanChangeCharacter = true;                               // true if the player is allowed to change his character
     private bool m_HasFired = false;                                        // used to keep the dropdown from firing twice
-    private bool m_WasKilled = false;                                       // keeps track if the player was killed this round to avoid killing him twice
+    private bool m_IsPlayerDead = false;                                    // keeps track if the player was killed this round to avoid killing him twice
+
+    private void Awake()
+    {
+        OnSpawnEvent = new UnityEvent();
+        OnRagdollEvent = new UnityEvent();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        // get a reference to the game manager
+        Debug.Log(GameObject.Find("GameManager"));
+        m_GameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
+        // get a reference to the camera so that a player can be added
+        GameObject cam = GameObject.Find("Main Camera");
+        m_Cam = cam.GetComponent<CameraMovement>();
+
+        // get all values needed
+        m_PauseMenu = m_GameManager.m_PauseMenu;
+
         // set the current character to the first character in the character prefab list
         m_NextCharacter = m_CharacterPrefabs[0];
 
@@ -45,9 +96,79 @@ public class LevelManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // check player inputs
+        if (Input.GetKeyDown("tab"))
+        {
+            // only allow pause menu if playing
+            if (m_LevelState == LevelState.Playing)
+            {
+                m_LevelState = LevelState.PauseMenu;
+                m_PauseMenu.enabled = true;
+                m_PauseMenuEase = new PauseMenuEase(false, Time.realtimeSinceStartup, m_PauseMenuEaseTime, true, Time.timeScale);
+            } else if (m_LevelState == LevelState.PauseMenu)
+            {
+                // reverse direction of ease
+                m_PauseMenuEase.IsEasingIn = false;
+                m_PauseMenuEase.IsFinished = false;
+                m_PauseMenuEase.StartTime = Time.realtimeSinceStartup;
+                m_PauseMenuEase.StartValue = Time.timeScale;
+            }
+        }
+
+        if (m_LevelState == LevelState.PauseMenu)
+        {
+            if (!m_PauseMenuEase.IsFinished)
+            {
+                // Ease into pause Menu
+                EasePauseMenu();
+            } else if (m_PauseMenuEase.IsEasingIn)
+            {
+                // easing in and done
+                
+            } else
+            {
+                // Easing out and done. Pause menu has endet
+                m_LevelState = LevelState.Playing;
+                // close pause menu
+                m_PauseMenu.enabled = false;
+            }
+        } else
+        {
+            // if not paused time should run normally
+            if (Time.timeScale != 1f) {
+                Time.timeScale = 1f;
+            }
+        }
+
         // allow the dropdown to fire again
         m_HasFired = false;
-        m_WasKilled = false;
+
+        if (m_IsPlayerDead && HasRagdollEnded())
+        {
+            LeaveCorpse();
+            DestoryPlayer();
+            m_LevelState = LevelState.RespawnAnimation;
+            m_Cam.InitDeathAnimation(m_SpawnPoint.transform.position);
+        } else if (m_LevelState == LevelState.RespawnAnimation)
+        {
+            // make respawn animation (move camera)
+            if (m_Cam.IsAnimationDone())
+            {
+                SpawnPlayer();
+                m_LevelState = LevelState.Playing;
+            }
+        }
+    }
+
+    private bool HasRagdollEnded()
+    {
+        // check if ragdoll has ended
+        bool slowed = m_Player.gameObject.GetComponent<Rigidbody2D>().velocity.magnitude < m_MinRagdolVel;
+        if (slowed && (m_Player.IsGrouned() || m_Player.IsTouchingSpikes))
+        {
+            return true;
+        }
+        return false;
     }
 
     private void SpawnPlayer()
@@ -58,61 +179,65 @@ public class LevelManager : MonoBehaviour
         // attatch the player to the Camera
         m_Cam.player = m_Player.gameObject;
 
-        // attatch the player transform to all objects that parallax
-        AssignPlayerToParralax();
         Debug.Log("spawned player");
+
+        m_IsPlayerDead = false;
+        GameManager.IsInputEnabled = true;
+        m_CanChangeCharacter = true;
+        OnSpawnEvent.Invoke();
+    }
+
+    private void DestoryPlayer()
+    {
+        Destroy(m_Player.gameObject);
     }
 
     private void Respawn()
     {
-        Destroy(m_Player.gameObject);
+        DestoryPlayer();
         SpawnPlayer();
-        m_CanChangeCharacter = true;
     }
 
-    // prepares everything needed in the scene
-    private void PrepareScene()
+    private void EasePauseMenu()
     {
-        // add listener to dropdown
-        m_DudeSelectDropdown.onValueChanged.AddListener(delegate
-        {
-            SelectDude(m_DudeSelectDropdown);
-        });
+        float currentTime = Time.realtimeSinceStartup - m_PauseMenuEase.StartTime;
+        float valueChange;
 
-        // give spawnzone the event method
-        if (m_SpawnZone == null)
+        if (m_PauseMenuEase.IsEasingIn)
         {
-            m_CanChangeCharacter = false;
-        }
-        else
+            valueChange = -m_PauseMenuEase.StartValue;
+        } else
         {
-            m_SpawnZone.GetComponent<SpawnZone>().m_OnSpawnLeave = delegate { OnSpawnLeave(); };
+            valueChange = 1f - m_PauseMenuEase.StartValue;
         }
 
-        // create game object for corpses and child it to level
-        m_Corpses = new GameObject("Corpses");
-        m_Corpses.transform.parent = gameObject.transform;
+        float value;
+
+        // check if done with ease
+        if (currentTime > m_PauseMenuEase.Duration)
+        {
+            // done with ease
+            value = m_PauseMenuEase.StartValue + valueChange;
+            m_PauseMenuEase.IsFinished = true;
+        } else
+        {
+            value = UtilityScript.LinearTween(currentTime, m_PauseMenuEase.StartValue, valueChange, m_PauseMenuEase.Duration);
+        }
+
+        // set time to value
+        Time.timeScale = value;
+
+        if (value == m_PauseMenuEase.StartValue + valueChange)
+        {
+            m_PauseMenuEase.IsFinished = true;
+        }
     }
 
-    // Kills the player
-    public void KillPlayer(GameObject trap)
+    // will be called at the end of the ragdol
+    private void LeaveCorpse()
     {
-        // can't kill player twice in one frame
-        if (m_WasKilled)
-        {
-            return;
-        }
-
-        m_WasKilled = true;
-
-        // destroy the kill source and regenerate Composite collider
-        Vector3 trappos = trap.transform.position;
-
-        // destroy the trap that killed the player
-        Destroy(trap);
-
         // place a corpse
-        GameObject corpse = Instantiate(m_Player.GetComponent<CharacterController2D>().m_Corpse, trappos, Quaternion.identity, m_Corpses.transform);
+        GameObject corpse = Instantiate(m_Player.GetComponent<CharacterController2D>().m_Corpse, m_Player.gameObject.transform.position, Quaternion.identity, m_Corpses.transform);
 
         Debug.Log("Lives: " + m_CurrentLives);
 
@@ -133,24 +258,59 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    // prepares everything needed in the scene
+    private void PrepareScene()
+    {
+        // disable pause menu ui
+        m_PauseMenu.enabled = false;
+
+        // add listener to dropdown
+        m_DudeSelectDropdown.onValueChanged.AddListener(delegate
+        {
+            OnDudeSelect(m_DudeSelectDropdown);
+        });
+
+        // give spawnzone the event method
+        if (m_SpawnZone == null)
+        {
+            m_CanChangeCharacter = false;
+        }
+        else
+        {
+            m_SpawnZone.GetComponent<SpawnZone>().m_OnSpawnLeave = delegate { OnSpawnLeave(); };
+        }
+
+        // create game object for corpses and child it to level
+        m_Corpses = new GameObject("Corpses");
+        m_Corpses.transform.parent = gameObject.transform;
+
+        // fill dropdown slider with information about the characters
+        List<string> DropdownOptions = new List<string> { };
+        foreach (GameObject character in m_CharacterPrefabs)
+        {
+            DropdownOptions.Add(character.name);
+        }
+
+        m_DudeSelectDropdown.AddOptions(DropdownOptions);
+    }
+
+    // Kills the player
+    public void KillPlayer(GameObject trap)
+    {
+        m_IsPlayerDead = true;
+        m_LevelState = LevelState.Ragdoll;
+        m_Player.StartRagdoll();
+        GameManager.IsInputEnabled = false;
+        return;
+    }
+
     public CharacterController2D GetPlayer()
     {
         return m_Player;
     }
 
-    // assigns the current player to all objects that use the parallax script
-    private void AssignPlayerToParralax()
-    {
-        Parallax[] scripts = GetComponentsInChildren<Parallax>();
-        foreach (Parallax script in scripts)
-        {
-            script.m_Controller = m_Player.GetComponent<Transform>();
-            script.CaptureStartPos();
-        }
-    }
-
     // A new dude has been selected in the dropdown menu
-    public void SelectDude(Dropdown change)
+    public void OnDudeSelect(Dropdown change)
     {
         // for some reason this can be fired twice. So here I check that it was the first time;
         if (m_HasFired)
@@ -196,6 +356,5 @@ public class LevelManager : MonoBehaviour
     public void OnSpawnLeave()
     {
         m_CanChangeCharacter = false;
-        Debug.Log("left spawn zone");
     }
 }

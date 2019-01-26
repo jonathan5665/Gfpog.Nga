@@ -805,7 +805,7 @@ Canvas:
   m_RenderMode: 1
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
-  m_PixelPerfect: 0
+  m_PixelPerfect: 1
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
@@ -967,7 +967,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Dude
+  m_Text: 
 --- !u!1 &8971123306820340524
 GameObject:
   m_ObjectHideFlags: 0
@@ -1319,11 +1319,7 @@ MonoBehaviour:
   m_ItemImage: {fileID: 0}
   m_Value: 0
   m_Options:
-    m_Options:
-    - m_Text: Dude
-      m_Image: {fileID: 21300000, guid: f8aac0c3ad3af1241940a43e5bbf521f, type: 3}
-    - m_Text: DudeFat
-      m_Image: {fileID: 21300000, guid: 61fc839e9d8eebd428d6c16079449868, type: 3}
+    m_Options: []
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

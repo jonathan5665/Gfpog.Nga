@@ -8,10 +8,10 @@ public class Parallax : MonoBehaviour
     [Range(0f, 2f)] [SerializeField] private float m_ParalaxProp = 0.5f;
 
     
-    public Transform m_Controller;  // the transform that controls the parallax
-    public Vector3 m_StartPos;  // the reference position for parallaxing
+    public Transform m_Controller;          // the transform that controls the parallax
+    public Vector3 m_StartPos;              // the reference position for parallaxing
 
-    private Transform m_ParentTransform;  // the transform that will be changed
+    private Transform m_ParentTransform;    // the transform that will be changed
 
     // Start is called before the first frame update
     void Start()
