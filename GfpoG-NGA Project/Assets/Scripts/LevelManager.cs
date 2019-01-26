@@ -13,7 +13,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int m_TotalLives;                                  // the amount of deaths before a reset                          
     [SerializeField] private GameObject m_SpawnPoint;                           // a GameObject positioned where the player will spawn
     [SerializeField] private GameObject m_SpawnZone;                            // The zone in which a character can be changed
-    [SerializeField] private float m_MinRagdolVel = 1f;                         // velocity at which ragdolling ends
     [Range(0, 0.5f)] [SerializeField] private float m_PauseMenuEaseTime = 0.1f; // the time for the start menu to ease in
     [SerializeField] GameObject[] m_CharacterPrefabs;                           // The Charcters available in the game
     [Range(0, 2)] [SerializeField] private float m_PauseMenuSlide = 1f;         // The amount the pause menu slides up when paused
@@ -39,14 +38,12 @@ public class LevelManager : MonoBehaviour
 
     private PauseMenuEase m_PauseMenuEase;
 
-    [HideInInspector] public GameObject m_Corpses;                          // the GameObject the corpses will be childed to
-    [HideInInspector] public Dropdown m_DudeSelectDropdown;                 // the dropdown menu that selects the next spawn
-    [HideInInspector] public CameraMovement m_Cam;                          // the camera that will be attatched to the player
+    [HideInInspector] public GameObject m_Corpses;                              // the GameObject the corpses will be childed to
+    [HideInInspector] public Dropdown m_DudeSelectDropdown;                     // the dropdown menu that selects the next spawn
+    [HideInInspector] public CameraMovement m_Cam;                              // the camera that will be attatched to the player
 
     // private settings
-    private float m_RagdollTimeout = 5f;                                    // The timeout for the ragdoll
-
-    private Canvas m_PauseMenu;                                             // The canvas for the pause menu
+    private Canvas m_PauseMenu;                                                 // The canvas for the pause menu
 
     public UnityEvent m_OnSpawnEvent;                                         // Gets called when the player is respawned      
     public UnityEvent m_OnRagdollEvent;                                       // When ragdoll state is enabled
@@ -64,7 +61,6 @@ public class LevelManager : MonoBehaviour
     private Tilemap m_TestMap;
     private bool m_CanChangeCharacter = true;                               // true if the player is allowed to change his character
     private bool m_HasFired = false;                                        // used to keep the dropdown from firing twice
-    private float m_RagdollStartTime;                                       // the time when the ragdoll has started
 
     private void Awake()
     {
@@ -186,9 +182,9 @@ public class LevelManager : MonoBehaviour
 
     private void StateRagdoll()
     {
-        if (HasRagdollEnded())
+        if (m_Player.HasRagdollEnded())
         {
-            LeaveCorpse();
+            RagdollEnd();
             DestoryPlayer();
             m_OnRespawnEvent.Invoke();
             m_LevelState = LevelState.RespawnAnimation;
@@ -223,18 +219,6 @@ public class LevelManager : MonoBehaviour
             SpawnPlayer();
             m_LevelState = LevelState.Playing;
         }
-    }
-
-    // returns true if ragdoll has endet
-    private bool HasRagdollEnded()
-    {
-        // check if ragdoll has ended
-        bool slowed = m_Player.gameObject.GetComponent<Rigidbody2D>().velocity.magnitude < m_MinRagdolVel;
-        if ((slowed || Time.timeSinceLevelLoad > m_RagdollStartTime + m_RagdollTimeout) && (m_Player.IsGrouned() || m_Player.IsTouchingSpikes))
-        {
-            return true;
-        }
-        return false;
     }
 
     private void SpawnPlayer()
@@ -299,14 +283,12 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    // will be called at the end of the ragdol
-    private void LeaveCorpse()
+    // will be called at the end of the ragdoll
+    private void RagdollEnd()
     {
-        // place a corpse
-        GameObject corpse = Instantiate(m_Player.GetComponent<CharacterController2D>().m_Corpse, m_Player.gameObject.transform.position, Quaternion.identity, m_Corpses.transform);
-
         Debug.Log("Lives: " + m_CurrentLives);
 
+        m_Player.OnRagdollEnd();
         // respawn or reset the level
         if (m_CurrentLives > 1)
         {
@@ -324,12 +306,10 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-
     private void StartRagdoll()
     {
         m_LevelState = LevelState.Ragdoll;
         m_Player.StartRagdoll();
-        m_RagdollStartTime = Time.timeSinceLevelLoad;
         GameManager.IsInputEnabled = false;
         m_OnRagdollEvent.Invoke();
     }

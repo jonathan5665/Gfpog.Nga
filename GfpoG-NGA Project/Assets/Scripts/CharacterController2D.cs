@@ -13,8 +13,10 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private bool m_AirControl = false;							// Whether or not a player can steer while jumping;
     [SerializeField] private LayerMask m_WhatIsGround;                          // A mask determining what is ground to the character
     [SerializeField] private Transform m_GroundCheck;                           // A position marking where to check if the player is grounded.
+    [SerializeField] private Transform m_PreciseGroundCheck;                    // A position marking where to check if the player is grounded more precise.
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
+    [SerializeField] private float m_MinRagdolVel = 1f;                         // velocity at which ragdolling ends
     [Range(-1000, 1000)] [SerializeField] private float m_RagdollTorque = 500f;
     [Range(-10, 10)] [SerializeField] private float m_JumpTorque = 1f;
     [Range(0, 1)] [SerializeField] private float m_TorqueTime = 0.5f;
@@ -22,19 +24,6 @@ public class CharacterController2D : MonoBehaviour
     private float m_TorqueThresh = 2.5f;
     public GameObject m_Corpse;                                                 //This character's corpse
 
-    public bool IsTouchingSpikes = false;
-
-    const float m_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
-    private bool m_Grounded;            // Whether or not the player is grounded.
-    const float k_CeilingRadius = .2f; // Radius of the overlap circle to determine if the player can stand up
-    private Rigidbody2D m_Rigidbody2D;
-    private bool m_FacingRight = true;  // For determining which way the player is currently facing.
-    private Vector3 m_Velocity = Vector3.zero;
-    private float playerGravity = 3f;  // for storing the original player gravity
-    private bool canJump = true;    // can the character jump again
-    private bool addTorque = false; // Do we want to spin
-    private float torqueTime;
-    private Vector2 m_LastFrameVelocity; // the velocity during the last frame.
     [Header("Events")]
     [Space]
 
@@ -44,6 +33,26 @@ public class CharacterController2D : MonoBehaviour
     public class BoolEvent : UnityEvent<bool> { }
 
     public BoolEvent OnCrouchEvent;
+    [HideInInspector] public bool IsTouchingSpikes = false;
+
+
+    const float m_GroundedRadius = .2f;                 // Radius of the overlap circle to determine if grounded
+    private bool m_Grounded;                            // Whether or not the player is grounded.
+    const float k_CeilingRadius = .2f;                  // Radius of the overlap circle to determine if the player can stand up
+    private Rigidbody2D m_Rigidbody2D;
+    private bool m_FacingRight = true;                  // For determining which way the player is currently facing.
+    private Vector3 m_Velocity = Vector3.zero;
+    private float playerGravity = 3f;                   // for storing the original player gravity
+    private bool canJump = true;                        // can the character jump again
+    private bool addTorque = false;                     // Do we want to spin
+    private float torqueTime;
+    private Vector2 m_LastFrameVelocity;                // the velocity during the last frame.
+    private Transform m_SpriteFollowerTrans;            // the sprite follower transform following the player
+    private LevelManager m_Level;                       // the level manager
+    private float m_RagdollStartTime;                   // the time when the ragdoll has started
+    private float m_RagdollTimeout = 5f;                // The timeout for the ragdoll
+    private bool m_IsRagdollOver = true;
+
     private bool m_wasCrouching = false;
 
     private void Awake()
@@ -57,6 +66,12 @@ public class CharacterController2D : MonoBehaviour
 
         if (OnCrouchEvent == null)
             OnCrouchEvent = new BoolEvent();
+
+        // get follower
+        m_SpriteFollowerTrans = gameObject.transform.Find("SpriteFollower");
+
+        // get level manager
+        m_Level = GameObject.Find("Level").GetComponent<LevelManager>();
     }
 
     private void FixedUpdate()
@@ -96,10 +111,22 @@ public class CharacterController2D : MonoBehaviour
                 gameObject.transform.Find("SpriteFollower").GetComponent<Rigidbody2D>().AddTorque(m_JumpTorque * Multi);
             }
         }
+
+        if (!m_IsRagdollOver)
+        {
+            // check if ragdoll has ended
+            bool slowed = m_Rigidbody2D.velocity.magnitude < m_MinRagdolVel;
+            if ((slowed || Time.timeSinceLevelLoad > m_RagdollStartTime + m_RagdollTimeout) && (IsTouchingSpikes|| PreciseGroundCheck()))
+            {
+                m_IsRagdollOver = true;
+            }
+        }
     }
 
-    void Update()
+    // a ground check that is a lot more precise
+    private bool PreciseGroundCheck()
     {
+        return Physics2D.OverlapPoint(m_PreciseGroundCheck.position, m_WhatIsGround) != null;
     }
 
     public void Move(float move, bool crouch, bool jump)
@@ -237,6 +264,27 @@ public class CharacterController2D : MonoBehaviour
     {
         gameObject.GetComponent<Collider2D>().sharedMaterial = m_RagdollMaterial;
         gameObject.transform.Find("SpriteFollower").GetComponent<Rigidbody2D>().AddTorque(m_RagdollTorque);
+        m_IsRagdollOver = false;
+        m_RagdollStartTime = Time.timeSinceLevelLoad;
+    }
+
+    public void OnRagdollEnd()
+    {
+        LeaveCorpse();
+    }
+
+    // leaves corpse at current position
+    public void LeaveCorpse()
+    {
+        float zRot = m_SpriteFollowerTrans.localEulerAngles.z;
+
+        // leave corpse and round rotation to nearest 90 degrees
+        GameObject corpse = Instantiate(m_Corpse, transform.position, Quaternion.Euler(0f, 0f, Mathf.Round(zRot / 90) * 90), m_Level.m_Corpses.transform);
+    }
+
+    public bool HasRagdollEnded()
+    {
+        return m_IsRagdollOver;
     }
 
     public Vector2 GetLastFrameVelocity()

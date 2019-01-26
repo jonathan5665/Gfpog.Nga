@@ -91,9 +91,6 @@ public class CameraMovement : MonoBehaviour
         gameObject.GetComponent<Camera>().orthographicSize = value;
         TransformToPlayer();
         m_EaseValuesZoom.IsFinished = UtilityScript.IsEaseDone(m_EaseValuesZoom);
-
-        if (m_EaseValuesZoom.IsFinished)
-            Debug.Log("test ==================");
     }
 
     private void InitRespawnAnimation()
@@ -101,9 +98,6 @@ public class CameraMovement : MonoBehaviour
         Debug.Log("init respawn");
         float currSize = gameObject.GetComponent<Camera>().orthographicSize;
         m_EaseValuesZoom = new UtilityScript.EaseValues(Time.timeSinceLevelLoad, m_DeathAnimTime, currSize, m_EaseValuesZoom.StartValue - currSize);
-
-        Debug.Log(m_EaseValuesZoom.StartValue + " | " + m_EaseValuesZoom.ValueChange);
-
         m_EaseValuesTrans = new UtilityScript.EaseValues(Time.timeSinceLevelLoad, m_DeathAnimTime, 0f, 1f);
         m_RespawnAnimStartValue = (Vector2)transform.position;
         m_RespawnAnimValueChange = m_SpawnPoint - (Vector2)transform.position;

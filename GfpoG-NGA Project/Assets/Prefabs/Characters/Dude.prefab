@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1032015282426052185
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8507468321943398839}
+  m_Layer: 8
+  m_Name: PreciseGroundCheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8507468321943398839
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1032015282426052185}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.51, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5830360383721336404}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5830360382582689920
 GameObject:
   m_ObjectHideFlags: 0
@@ -64,6 +94,7 @@ Transform:
   m_Children:
   - {fileID: 5830360383817333631}
   - {fileID: 5830360382582689921}
+  - {fileID: 8507468321943398839}
   - {fileID: 3426272187265797059}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -173,15 +204,16 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   m_GroundCheck: {fileID: 5830360382582689921}
+  m_PreciseGroundCheck: {fileID: 8507468321943398839}
   m_CeilingCheck: {fileID: 5830360383817333631}
   m_CrouchDisableCollider: {fileID: 0}
+  m_MinRagdolVel: 1
   m_RagdollTorque: 250
   m_JumpTorque: 10
   m_TorqueTime: 0.5
   m_RagdollMaterial: {fileID: 6200000, guid: 541b71fa63f065245a41eeb5a3805435, type: 2}
   m_Corpse: {fileID: 4676977521288398997, guid: 38487e22874445c48badbd3ab2605286,
     type: 3}
-  IsTouchingSpikes: 0
   OnLandEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -192,6 +224,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: CharacterController2D+BoolEvent, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  IsTouchingSpikes: 0
 --- !u!58 &684455597948201084
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -293,7 +326,7 @@ PrefabInstance:
     - target: {fileID: 6073441254256471933, guid: 8fbabc02fc78cf942964cf8ad74105a4,
         type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6073441254256471933, guid: 8fbabc02fc78cf942964cf8ad74105a4,
         type: 3}
