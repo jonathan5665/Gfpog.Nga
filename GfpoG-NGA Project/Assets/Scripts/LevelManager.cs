@@ -43,10 +43,14 @@ public class LevelManager : MonoBehaviour
     [HideInInspector] public Dropdown m_DudeSelectDropdown;                 // the dropdown menu that selects the next spawn
     [HideInInspector] public CameraMovement m_Cam;                          // the camera that will be attatched to the player
 
+    // private settings
+    private float m_RagdollTimeout = 5f;                                    // The timeout for the ragdoll
+
     private Canvas m_PauseMenu;                                             // The canvas for the pause menu
 
-    public UnityEvent OnSpawnEvent;                                         // Gets called when the player is respawned      
-    public UnityEvent OnRagdollEvent;                                       // When ragdoll state is enabled
+    public UnityEvent m_OnSpawnEvent;                                         // Gets called when the player is respawned      
+    public UnityEvent m_OnRagdollEvent;                                       // When ragdoll state is enabled
+    public UnityEvent m_OnRespawnEvent;                                       // Player Respawn animation is going
 
     // the current state of the level / gameplay in the level
     public enum LevelState { Playing, Ragdoll, RespawnAnimation, PauseMenu };
@@ -60,12 +64,13 @@ public class LevelManager : MonoBehaviour
     private Tilemap m_TestMap;
     private bool m_CanChangeCharacter = true;                               // true if the player is allowed to change his character
     private bool m_HasFired = false;                                        // used to keep the dropdown from firing twice
-    private bool m_IsPlayerDead = false;                                    // keeps track if the player was killed this round to avoid killing him twice
+    private float m_RagdollStartTime;                                       // the time when the ragdoll has started
 
     private void Awake()
     {
-        OnSpawnEvent = new UnityEvent();
-        OnRagdollEvent = new UnityEvent();
+        m_OnSpawnEvent = new UnityEvent();
+        m_OnRagdollEvent = new UnityEvent();
+        m_OnRespawnEvent = new UnityEvent();
     }
 
     // Start is called before the first frame update
@@ -91,11 +96,54 @@ public class LevelManager : MonoBehaviour
         SpawnPlayer();
        
         m_CurrentLives = m_TotalLives;
+
+        // reset timescale
+        Time.timeScale = 1f;
+    }
+
+    // prepares everything needed in the scene
+    private void PrepareScene()
+    {
+        // disable pause menu ui
+        m_PauseMenu.enabled = false;
+
+        // add listener to dropdown
+        m_DudeSelectDropdown.onValueChanged.AddListener(delegate
+        {
+            OnDudeSelect(m_DudeSelectDropdown);
+        });
+
+        // give spawnzone the event method
+        if (m_SpawnZone == null)
+        {
+            m_CanChangeCharacter = false;
+        }
+        else
+        {
+            m_SpawnZone.GetComponent<SpawnZone>().m_OnSpawnLeave = delegate { OnSpawnLeave(); };
+        }
+
+        // create game object for corpses and child it to level
+        m_Corpses = new GameObject("Corpses");
+        m_Corpses.transform.parent = gameObject.transform;
+
+        // fill dropdown slider with information about the characters
+        List<string> DropdownOptions = new List<string> { };
+        foreach (GameObject character in m_CharacterPrefabs)
+        {
+            DropdownOptions.Add(character.name);
+        }
+
+        m_DudeSelectDropdown.AddOptions(DropdownOptions);
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        // allow the dropdown to fire again
+        m_HasFired = false;
+
         // check player inputs
         if (Input.GetKeyDown("tab"))
         {
@@ -115,56 +163,74 @@ public class LevelManager : MonoBehaviour
             }
         }
 
+        // different level states
         if (m_LevelState == LevelState.PauseMenu)
         {
-            if (!m_PauseMenuEase.IsFinished)
-            {
-                // Ease into pause Menu
-                EasePauseMenu();
-            } else if (m_PauseMenuEase.IsEasingIn)
-            {
-                // easing in and done
-                
-            } else
-            {
-                // Easing out and done. Pause menu has endet
-                m_LevelState = LevelState.Playing;
-                // close pause menu
-                m_PauseMenu.enabled = false;
-            }
-        } else
+            StatePauseMenu();
+        } else if (m_LevelState == LevelState.Playing)
         {
-            // if not paused time should run normally
-            if (Time.timeScale != 1f) {
-                Time.timeScale = 1f;
-            }
-        }
-
-        // allow the dropdown to fire again
-        m_HasFired = false;
-
-        if (m_IsPlayerDead && HasRagdollEnded())
+            StatePlaying();
+        } else if (m_LevelState == LevelState.Ragdoll)
         {
-            LeaveCorpse();
-            DestoryPlayer();
-            m_LevelState = LevelState.RespawnAnimation;
-            m_Cam.InitDeathAnimation(m_SpawnPoint.transform.position);
+            StateRagdoll();
         } else if (m_LevelState == LevelState.RespawnAnimation)
         {
-            // make respawn animation (move camera)
-            if (m_Cam.IsAnimationDone())
-            {
-                SpawnPlayer();
-                m_LevelState = LevelState.Playing;
-            }
+            StateRespawnAnimation();
         }
     }
 
+    private void StatePlaying()
+    {
+
+    }
+
+    private void StateRagdoll()
+    {
+        if (HasRagdollEnded())
+        {
+            LeaveCorpse();
+            DestoryPlayer();
+            m_OnRespawnEvent.Invoke();
+            m_LevelState = LevelState.RespawnAnimation;
+        }
+    }
+
+    private void StatePauseMenu()
+    {
+        if (!m_PauseMenuEase.IsFinished)
+        {
+            // Ease into pause Menu
+            EasePauseMenu();
+        }
+        else if (m_PauseMenuEase.IsEasingIn)
+        {
+            // easing in and done
+        }
+        else
+        {
+            // Easing out and done. Pause menu has endet
+            m_LevelState = LevelState.Playing;
+            // close pause menu
+            m_PauseMenu.enabled = false;
+        }
+    }
+
+    private void StateRespawnAnimation()
+    {
+        // make respawn animation (move camera)
+        if (m_Cam.IsAnimationDone())
+        {
+            SpawnPlayer();
+            m_LevelState = LevelState.Playing;
+        }
+    }
+
+    // returns true if ragdoll has endet
     private bool HasRagdollEnded()
     {
         // check if ragdoll has ended
         bool slowed = m_Player.gameObject.GetComponent<Rigidbody2D>().velocity.magnitude < m_MinRagdolVel;
-        if (slowed && (m_Player.IsGrouned() || m_Player.IsTouchingSpikes))
+        if ((slowed || Time.timeSinceLevelLoad > m_RagdollStartTime + m_RagdollTimeout) && (m_Player.IsGrouned() || m_Player.IsTouchingSpikes))
         {
             return true;
         }
@@ -181,10 +247,10 @@ public class LevelManager : MonoBehaviour
 
         Debug.Log("spawned player");
 
-        m_IsPlayerDead = false;
+        m_LevelState = LevelState.Playing;
         GameManager.IsInputEnabled = true;
         m_CanChangeCharacter = true;
-        OnSpawnEvent.Invoke();
+        m_OnSpawnEvent.Invoke();
     }
 
     private void DestoryPlayer()
@@ -258,50 +324,24 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    // prepares everything needed in the scene
-    private void PrepareScene()
+
+    private void StartRagdoll()
     {
-        // disable pause menu ui
-        m_PauseMenu.enabled = false;
-
-        // add listener to dropdown
-        m_DudeSelectDropdown.onValueChanged.AddListener(delegate
-        {
-            OnDudeSelect(m_DudeSelectDropdown);
-        });
-
-        // give spawnzone the event method
-        if (m_SpawnZone == null)
-        {
-            m_CanChangeCharacter = false;
-        }
-        else
-        {
-            m_SpawnZone.GetComponent<SpawnZone>().m_OnSpawnLeave = delegate { OnSpawnLeave(); };
-        }
-
-        // create game object for corpses and child it to level
-        m_Corpses = new GameObject("Corpses");
-        m_Corpses.transform.parent = gameObject.transform;
-
-        // fill dropdown slider with information about the characters
-        List<string> DropdownOptions = new List<string> { };
-        foreach (GameObject character in m_CharacterPrefabs)
-        {
-            DropdownOptions.Add(character.name);
-        }
-
-        m_DudeSelectDropdown.AddOptions(DropdownOptions);
+        m_LevelState = LevelState.Ragdoll;
+        m_Player.StartRagdoll();
+        m_RagdollStartTime = Time.timeSinceLevelLoad;
+        GameManager.IsInputEnabled = false;
+        m_OnRagdollEvent.Invoke();
     }
 
     // Kills the player
     public void KillPlayer(GameObject trap)
     {
-        m_IsPlayerDead = true;
-        m_LevelState = LevelState.Ragdoll;
-        m_Player.StartRagdoll();
-        GameManager.IsInputEnabled = false;
-        return;
+        // you can only kill player if playing
+        if (m_LevelState == LevelState.Playing)
+        {
+            StartRagdoll();
+        }
     }
 
     public CharacterController2D GetPlayer()

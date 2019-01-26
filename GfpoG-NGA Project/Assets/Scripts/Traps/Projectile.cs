@@ -17,7 +17,7 @@ public class Projectile : MonoBehaviour
 
     private void Start()
     {
-        m_Level.OnSpawnEvent.AddListener(DestroyThis);
+        m_Level.m_OnSpawnEvent.AddListener(DestroyThis);
     }
 
     private void Update()
@@ -27,7 +27,6 @@ public class Projectile : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         CharacterController2D player = collision.gameObject.GetComponent<CharacterController2D>();
-        Debug.Log(collision.gameObject.name);
         if (player != null)
         {
             m_Level.KillPlayer(gameObject);

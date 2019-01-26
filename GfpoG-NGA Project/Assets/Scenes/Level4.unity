@@ -2994,12 +2994,17 @@ MonoBehaviour:
   m_Corpses: {fileID: 0}
   m_DudeSelectDropdown: {fileID: 0}
   m_Cam: {fileID: 0}
-  OnSpawnEvent:
+  m_OnSpawnEvent:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  OnRagdollEvent:
+  m_OnRagdollEvent:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  m_OnRespawnEvent:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
@@ -3109,8 +3114,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  m_DeathAnimTime: 0.5
-  m_RagdollZoom: 0.3
+  m_DeathAnimTime: 1
+  m_RagdollZoom: 2
   m_RagdollZoomTime: 1
 --- !u!114 &1630189878
 MonoBehaviour:
