@@ -2366,7 +2366,7 @@ CompositeCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_GeometryType: 0
+  m_GeometryType: 1
   m_GenerationType: 0
   m_EdgeRadius: 0
   m_ColliderPaths:
@@ -2984,7 +2984,6 @@ MonoBehaviour:
   m_TotalLives: 10
   m_SpawnPoint: {fileID: 1582086388}
   m_SpawnZone: {fileID: 1901943459}
-  m_MinRagdolVel: 1
   m_PauseMenuEaseTime: 0.1
   m_CharacterPrefabs:
   - {fileID: 5830360383721336400, guid: 3d8b6183e933d6946bce2971b9ac5185, type: 3}
