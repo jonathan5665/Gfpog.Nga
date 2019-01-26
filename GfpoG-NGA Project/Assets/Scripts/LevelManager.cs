@@ -97,7 +97,7 @@ public class LevelManager : MonoBehaviour
         Time.timeScale = 1f;
 
         // start ragdoll if player dies
-        m_Player.OnDeathEvent.AddListener(StartRagdoll);
+        CharacterController2D.OnDeathEvent.AddListener(StartRagdoll);
     }
 
     // prepares everything needed in the scene

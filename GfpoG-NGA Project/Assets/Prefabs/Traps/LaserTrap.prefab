@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1007804313374779293}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.573928, y: 8.288833, z: -0.71838254}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 7255752667875264429}
@@ -129,6 +129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ShootDelayMS: 1000
   m_ShootTimeMS: 2000
+  m_ShootStarTOffsetMS: 1000
   m_LineRenderer: {fileID: 4088012427165079491}
 --- !u!1 &7498845844350827098
 GameObject:
@@ -140,7 +141,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7255752667875264429}
   - component: {fileID: 4088012427165079491}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -178,7 +179,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: d8da9792a26b85f4ca2fe824d7f1b87d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -254,5 +255,5 @@ LineRenderer:
     textureMode: 0
     shadowBias: 0.5
     generateLightingData: 0
-  m_UseWorldSpace: 0
+  m_UseWorldSpace: 1
   m_Loop: 0

@@ -214,16 +214,6 @@ MonoBehaviour:
   m_RagdollMaterial: {fileID: 6200000, guid: 541b71fa63f065245a41eeb5a3805435, type: 2}
   m_Corpse: {fileID: 4676977521288398997, guid: 38487e22874445c48badbd3ab2605286,
     type: 3}
-  OnLandEvent:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
-  OnCrouchEvent:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: CharacterController2D+BoolEvent, Assembly-CSharp, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
   IsTouchingSpikes: 0
 --- !u!58 &684455597948201084
 CircleCollider2D:
@@ -367,6 +357,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AngularDrag
       value: 0.00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 6073441254256471932, guid: 8fbabc02fc78cf942964cf8ad74105a4,
+        type: 3}
+      propertyPath: m_CollisionDetection
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 984708145537522746, guid: 8fbabc02fc78cf942964cf8ad74105a4,
         type: 3}

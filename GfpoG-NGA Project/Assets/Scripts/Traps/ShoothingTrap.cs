@@ -7,6 +7,7 @@ public class ShoothingTrap : MonoBehaviour
     [SerializeField] private GameObject m_ProjectilePrefab;
     [Range(0, 5000)] [SerializeField] private int m_ShootDelayMS = 1000;
     [Range(0, 10)] [SerializeField] private float m_ProjectileSpeed = 10f;  // the speed of the projectile
+    [Range(0, 10000)] [SerializeField] private int m_ShootStarTOffsetMS = 1000;  // the offset to when it starts
 
     private float m_NextShootTime = 0;
     private LevelManager m_Level;
@@ -15,6 +16,11 @@ public class ShoothingTrap : MonoBehaviour
     private void Awake()
     {
         m_Level = GameObject.Find("Level").GetComponent<LevelManager>();
+    }
+
+    private void Start()
+    {
+        m_NextShootTime = Time.timeSinceLevelLoad + m_ShootDelayMS / 1000;
     }
 
     // Update is called once per frame

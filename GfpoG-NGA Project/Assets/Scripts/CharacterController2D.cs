@@ -27,13 +27,13 @@ public class CharacterController2D : MonoBehaviour
     [Header("Events")]
     [Space]
 
-    public UnityEvent OnLandEvent;
-    public UnityEvent OnDeathEvent;
+    public static UnityEvent OnLandEvent;
+    public static UnityEvent OnDeathEvent;
 
     [System.Serializable]
     public class BoolEvent : UnityEvent<bool> { }
 
-    public BoolEvent OnCrouchEvent;
+    public static BoolEvent OnCrouchEvent;
     [HideInInspector] public bool IsTouchingSpikes = false;
 
 
