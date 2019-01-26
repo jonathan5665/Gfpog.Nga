@@ -83,6 +83,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4676977521288398997, guid: fc75b372f0d18904abd6a60fd1827cce,
         type: 3}
+    - target: {fileID: 7906783103442515105, guid: 3d8b6183e933d6946bce2971b9ac5185,
+        type: 3}
+      propertyPath: m_RagdollMaterial
+      value: 
+      objectReference: {fileID: 6200000, guid: ed5ed3a8052a3d5408f67e93f0fecbbd, type: 2}
     - target: {fileID: 3426272187265797056, guid: 3d8b6183e933d6946bce2971b9ac5185,
         type: 3}
       propertyPath: m_Color.r

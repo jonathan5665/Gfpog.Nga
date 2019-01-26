@@ -7897,12 +7897,25 @@ MonoBehaviour:
   m_SpawnPoint: {fileID: 1582086388}
   m_SpawnZone: {fileID: 1901943459}
   m_MinRagdolVel: 1
-  m_CameraPanSpeed: 50
+  m_StartMenuEaseTime: 0.1
+  m_CharacterPrefabs:
+  - {fileID: 5830360383721336400, guid: 3d8b6183e933d6946bce2971b9ac5185, type: 3}
+  - {fileID: 8322000213345222662, guid: acd073950037e93499c431b68d940356, type: 3}
+  - {fileID: 2898977568877546803, guid: 686c4cb4728cd8747bc0404ed0225e54, type: 3}
   m_Corpses: {fileID: 0}
   m_DudeSelectDropdown: {fileID: 0}
   m_Cam: {fileID: 0}
+  OnSpawnEvent:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnRagdollEvent:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
   m_LevelState: 0
-  m_CharacterPrefabs: []
   m_GameManager: {fileID: 0}
 --- !u!4 &1590213139
 Transform:
@@ -8006,6 +8019,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
+  m_DeathAnimTime: 0.5
+  m_RagdollZoom: 0.3
+  m_RagdollZoomTime: 1
 --- !u!114 &1630189878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8018,7 +8034,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c6a0e409e005b54a99d69e6a2f30134, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 3265289511803907781, guid: e280e9682c6ef3341b5f3372a6989de3,
+  m_GameManager: {fileID: 3265289511803907781, guid: e280e9682c6ef3341b5f3372a6989de3,
     type: 3}
 --- !u!114 &1630189879
 MonoBehaviour:
