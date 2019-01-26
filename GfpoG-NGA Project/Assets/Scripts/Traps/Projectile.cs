@@ -29,7 +29,7 @@ public class Projectile : MonoBehaviour
         CharacterController2D player = collision.gameObject.GetComponent<CharacterController2D>();
         if (player != null)
         {
-            m_Level.KillPlayer(gameObject);
+            player.Kill();
         }
         // destroy this after half a second
         Destroy(gameObject, 0.1f);

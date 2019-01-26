@@ -28,6 +28,7 @@ public class CharacterController2D : MonoBehaviour
     [Space]
 
     public UnityEvent OnLandEvent;
+    public UnityEvent OnDeathEvent;
 
     [System.Serializable]
     public class BoolEvent : UnityEvent<bool> { }
@@ -66,6 +67,9 @@ public class CharacterController2D : MonoBehaviour
 
         if (OnCrouchEvent == null)
             OnCrouchEvent = new BoolEvent();
+
+        if (OnDeathEvent == null)
+            OnDeathEvent = new UnityEvent();
 
         // get follower
         m_SpriteFollowerTrans = gameObject.transform.Find("SpriteFollower");
@@ -290,5 +294,11 @@ public class CharacterController2D : MonoBehaviour
     public Vector2 GetLastFrameVelocity()
     {
         return m_LastFrameVelocity;
+    }
+
+    // kill the player
+    public void Kill()
+    {
+        OnDeathEvent.Invoke();
     }
 }

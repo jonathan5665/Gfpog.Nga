@@ -36,7 +36,7 @@ public class Spiketrap : MonoBehaviour
         player.IsTouchingSpikes = true;
 
         m_PlayerRb = collision.gameObject.GetComponent<Rigidbody2D>();
-        m_Level.KillPlayer(gameObject);
+        player.Kill();
     }
 
     private void OnTriggerExit2D(Collider2D collision)

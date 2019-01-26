@@ -95,6 +95,9 @@ public class LevelManager : MonoBehaviour
 
         // reset timescale
         Time.timeScale = 1f;
+
+        // start ragdoll if player dies
+        m_Player.OnDeathEvent.AddListener(StartRagdoll);
     }
 
     // prepares everything needed in the scene
@@ -312,16 +315,6 @@ public class LevelManager : MonoBehaviour
         m_Player.StartRagdoll();
         GameManager.IsInputEnabled = false;
         m_OnRagdollEvent.Invoke();
-    }
-
-    // Kills the player
-    public void KillPlayer(GameObject trap)
-    {
-        // you can only kill player if playing
-        if (m_LevelState == LevelState.Playing)
-        {
-            StartRagdoll();
-        }
     }
 
     public CharacterController2D GetPlayer()
