@@ -95,7 +95,6 @@ public class CameraMovement : MonoBehaviour
 
     private void InitRespawnAnimation()
     {
-        Debug.Log("init respawn");
         float currSize = gameObject.GetComponent<Camera>().orthographicSize;
         m_EaseValuesZoom = new UtilityScript.EaseValues(Time.timeSinceLevelLoad, m_DeathAnimTime, currSize, m_EaseValuesZoom.StartValue - currSize);
         m_EaseValuesTrans = new UtilityScript.EaseValues(Time.timeSinceLevelLoad, m_DeathAnimTime, 0f, 1f);
@@ -106,7 +105,6 @@ public class CameraMovement : MonoBehaviour
 
     private void InitRagdollAnimation()
     {
-        Debug.Log("init ragdoll");
         float currSize = gameObject.GetComponent<Camera>().orthographicSize;
         m_EaseValuesZoom = new UtilityScript.EaseValues(Time.timeSinceLevelLoad, m_RagdollZoomTime, currSize, m_RagdollZoom - currSize);
 

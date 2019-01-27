@@ -79,13 +79,8 @@ public class GameManager : MonoBehaviour
         NextCharacterImage t_img = m_UI.GetComponentInChildren<NextCharacterImage>();
         t_img.m_levelObject = m_level;
 
-        Dropdown t_dropdown = m_PauseMenu.GetComponentInChildren<Dropdown>();
-        m_LevelManager.m_DudeSelectDropdown = t_dropdown;
-
-        t_dropdown.onValueChanged.AddListener(delegate { m_LevelManager.OnDudeSelect(t_dropdown); });
-
         Button t_button = m_PauseMenu.GetComponentInChildren<Button>();
-        t_button.onClick.AddListener(delegate { this.ReloadScene(); });
+        t_button.onClick.AddListener(delegate { ReloadScene(); });
         
     }
 

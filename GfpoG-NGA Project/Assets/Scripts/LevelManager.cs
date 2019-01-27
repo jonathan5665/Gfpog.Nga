@@ -10,34 +10,33 @@ public class LevelManager : MonoBehaviour
 {
 
     // settings
-    [SerializeField] private int m_TotalLives;                                  // the amount of deaths before a reset                          
-    [SerializeField] private GameObject m_SpawnPoint;                           // a GameObject positioned where the player will spawn
-    [SerializeField] private GameObject m_SpawnZone;                            // The zone in which a character can be changed
-    [SerializeField] GameObject[] m_CharacterPrefabs;                           // The Charcters available in the game
+    [SerializeField] private int m_TotalLives;              // the amount of deaths before a reset                          
+    [SerializeField] private GameObject m_SpawnPoint;       // a GameObject positioned where the player will spawn
+    [SerializeField] private GameObject m_SpawnZone;        // The zone in which a character can be changed
+    [SerializeField] GameObject[] m_CharacterPrefabs;       // The Charcters available in the game
 
-    [HideInInspector] public GameObject m_Corpses;                              // the GameObject the corpses will be childed to
-    [HideInInspector] public Dropdown m_DudeSelectDropdown;                     // the dropdown menu that selects the next spawn
-    [HideInInspector] public CameraMovement m_Cam;                              // the camera that will be attatched to the player
-
-    // private settings
-    private PauseMenu m_PauseMenu;                                              // The pause menu
-
-    public UnityEvent m_OnSpawnEvent;                                           // Gets called when the player is respawned      
-    public UnityEvent m_OnRagdollEvent;                                         // When ragdoll state is enabled
-    public UnityEvent m_OnRespawnEvent;                                         // Player Respawn animation is going
+    // Events
+    public UnityEvent m_OnSpawnEvent;                       // Gets called when the player is respawned      
+    public UnityEvent m_OnRagdollEvent;                     // When ragdoll state is enabled
+    public UnityEvent m_OnRespawnEvent;                     // Player Respawn animation is going
 
     // the current state of the level / gameplay in the level
     public enum LevelState { Playing, Ragdoll, RespawnAnimation, PauseMenu };
     public LevelState m_LevelState = LevelState.Playing;
 
+    [HideInInspector] public GameObject m_Corpses;          // the GameObject the corpses will be childed to
+
     // variables
-    [HideInInspector] public GameManager m_GameManager;                     // the game manager
-    private GameObject m_NextCharacter;                                     // the character that will be spawned
-    private CharacterController2D m_Player;                                 // the player
-    private int m_CurrentLives;                                             // the amount of deaths still left
-    private Tilemap m_TestMap;
-    private bool m_CanChangeCharacter = true;                               // true if the player is allowed to change his character
-    private bool m_HasFired = false;                                        // used to keep the dropdown from firing twice
+    private GameManager m_GameManager;                      // the game manager
+    private GameObject m_NextCharacter;                     // the character that will be spawned
+    private CharacterController2D m_Player;                 // the player
+    private int m_CurrentLives;                             // the amount of deaths still left
+    private bool m_CanChangeCharacter = true;               // true if the player is allowed to change his character
+    private bool m_HasFired = false;                        // used to keep the dropdown from firing twice
+    private PauseMenu m_PauseMenu;                          // The pause menu
+    private Dropdown m_DudeSelectDropdown;                  // the dropdown menu that selects the next spawn
+    private CameraMovement m_Cam;                           // the camera that will be attatched to the player
+
 
     private void Awake()
     {
@@ -50,7 +49,7 @@ public class LevelManager : MonoBehaviour
     void Start()
     {
         // get a reference to the game manager
-        m_GameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        m_GameManager = GameManager.s_instance;
 
         // get a reference to the camera so that a player can be added
         GameObject cam = GameObject.Find("Main Camera");
@@ -58,6 +57,10 @@ public class LevelManager : MonoBehaviour
 
         // get all values needed
         m_PauseMenu = m_GameManager.m_PauseMenu.GetComponent<PauseMenu>();
+        m_DudeSelectDropdown = m_PauseMenu.GetComponentInChildren<Dropdown>();
+
+        // add listener to dropdown
+        m_DudeSelectDropdown.onValueChanged.AddListener(delegate { OnDudeSelect(m_DudeSelectDropdown); });
 
         // set the current character to the first character in the character prefab list
         m_NextCharacter = m_CharacterPrefabs[0];

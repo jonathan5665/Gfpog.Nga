@@ -14,6 +14,7 @@ public class CharacterController2D : MonoBehaviour
     [SerializeField] private LayerMask m_WhatIsGround;                          // A mask determining what is ground to the character
     [SerializeField] private Transform m_GroundCheck;                           // A position marking where to check if the player is grounded.
     [SerializeField] private Transform m_PreciseGroundCheck;                    // A position marking where to check if the player is grounded more precise.
+    [SerializeField] private float m_PreciseCheckDist = 0.01f;                  // The distance to the ground check the ground has to be
     [SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
     [SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
     [SerializeField] private float m_MinRagdolVel = 1f;                         // velocity at which ragdolling ends
@@ -130,7 +131,9 @@ public class CharacterController2D : MonoBehaviour
     // a ground check that is a lot more precise
     private bool PreciseGroundCheck()
     {
-        return Physics2D.OverlapPoint(m_PreciseGroundCheck.position, m_WhatIsGround) != null;
+        RaycastHit2D results = Physics2D.Raycast(m_PreciseGroundCheck.position, -m_PreciseGroundCheck.up, m_PreciseCheckDist, m_WhatIsGround);
+        return results.collider != null;
+        //return Physics2D.OverlapPoint(m_PreciseGroundCheck.position, m_WhatIsGround) != null;
     }
 
     public void Move(float move, bool crouch, bool jump)
@@ -296,9 +299,13 @@ public class CharacterController2D : MonoBehaviour
         return m_LastFrameVelocity;
     }
 
-    // kill the player
+    // Kill the player
     public void Kill()
     {
-        OnDeathEvent.Invoke();
+        // Don't die if already dead (Is ragdoll over)
+        if (m_IsRagdollOver)
+        {
+            OnDeathEvent.Invoke();
+        }
     }
 }

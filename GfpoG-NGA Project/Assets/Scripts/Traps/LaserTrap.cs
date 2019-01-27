@@ -47,7 +47,6 @@ public class LaserTrap : MonoBehaviour
         Vector2 fire_pos = transform.position; // - transform.up;
 
         RaycastHit2D hitInfo = Physics2D.Raycast(transform.position - transform.up, -transform.up, 1000f);//, ~m_Ignore);
-        Debug.Log(hitInfo.collider.gameObject.name);
 
         if (hitInfo)
         {
@@ -67,12 +66,10 @@ public class LaserTrap : MonoBehaviour
     
     void OnShootStart()
     {
-        Debug.Log("start");
         m_LineRenderer.enabled = true;
     }
 
     void OnShootEnd() {
         m_LineRenderer.enabled = false;
-        Debug.Log("end");
     }
 }
