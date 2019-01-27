@@ -23,14 +23,33 @@ public static class UtilityScript
     }
 
     // checks if done
-    public static bool IsEaseDone(EaseValues easeValues)
+    public static bool IsEaseDone(EaseValues easeValues, bool useRealtime=false)
     {
-        return Time.timeSinceLevelLoad > easeValues.StartTime + easeValues.Duration;
+        float time;
+        if (useRealtime)
+        {
+            time = Time.realtimeSinceStartup;
+        } else
+        {
+            time = Time.timeSinceLevelLoad;
+        }
+
+        return time > easeValues.StartTime + easeValues.Duration;
     }
 
-    public static float QuadEaseInOut(EaseValues easeValues)
+    public static float QuadEaseInOut(EaseValues easeValues, bool useRealtime = false)
     {
-        return QuadEaseInOut(Time.timeSinceLevelLoad - easeValues.StartTime, easeValues.StartValue, easeValues.ValueChange, easeValues.Duration);
+        float time;
+        if (useRealtime)
+        {
+            time = Time.realtimeSinceStartup;
+        }
+        else
+        {
+            time = Time.timeSinceLevelLoad;
+        }
+
+        return QuadEaseInOut(time - easeValues.StartTime, easeValues.StartValue, easeValues.ValueChange, easeValues.Duration);
     }
 
     private static float QuadEaseInOut(float currentTime, float startValue, float valueChange, float duration)
@@ -42,9 +61,19 @@ public static class UtilityScript
         return -valueChange / 2 * (currentTime * (currentTime - 2) - 1) + startValue;
     }
 
-    public static float LinearTween(EaseValues easeValues)
+    public static float LinearTween(EaseValues easeValues, bool useRealtime = false)
     {
-        return LinearTween(Time.timeSinceLevelLoad - easeValues.StartTime, easeValues.StartValue, easeValues.ValueChange, easeValues.Duration);
+        float time;
+        if (useRealtime)
+        {
+            time = Time.realtimeSinceStartup;
+        }
+        else
+        {
+            time = Time.timeSinceLevelLoad;
+        }
+
+        return LinearTween(time - easeValues.StartTime, easeValues.StartValue, easeValues.ValueChange, easeValues.Duration);
     }
 
     public static float LinearTween(float currentTime, float startValue, float valueChange, float duration)

@@ -13,41 +13,18 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private int m_TotalLives;                                  // the amount of deaths before a reset                          
     [SerializeField] private GameObject m_SpawnPoint;                           // a GameObject positioned where the player will spawn
     [SerializeField] private GameObject m_SpawnZone;                            // The zone in which a character can be changed
-    [Range(0, 0.5f)] [SerializeField] private float m_PauseMenuEaseTime = 0.1f; // the time for the start menu to ease in
     [SerializeField] GameObject[] m_CharacterPrefabs;                           // The Charcters available in the game
-    [Range(0, 2)] [SerializeField] private float m_PauseMenuSlide = 1f;         // The amount the pause menu slides up when paused
-
-    // The settings for the pause menu ease
-    private struct PauseMenuEase
-    {
-        public bool IsFinished;             // true if ease is finished
-        public float StartTime;             // the time the ease starts
-        public float Duration;              // the time the ease takes
-        public bool IsEasingIn;             // a variable to check if we are easing in our out of the pause menu
-        public float StartValue;
-
-        public PauseMenuEase(bool isFinished, float startTime, float easeTime, bool isEasingIn, float startValue)
-        {
-            IsFinished = isFinished;
-            StartTime = startTime;
-            Duration = easeTime;
-            IsEasingIn = isEasingIn;
-            StartValue = startValue;
-        }
-    }
-
-    private PauseMenuEase m_PauseMenuEase;
 
     [HideInInspector] public GameObject m_Corpses;                              // the GameObject the corpses will be childed to
     [HideInInspector] public Dropdown m_DudeSelectDropdown;                     // the dropdown menu that selects the next spawn
     [HideInInspector] public CameraMovement m_Cam;                              // the camera that will be attatched to the player
 
     // private settings
-    private Canvas m_PauseMenu;                                                 // The canvas for the pause menu
+    private PauseMenu m_PauseMenu;                                              // The pause menu
 
-    public UnityEvent m_OnSpawnEvent;                                         // Gets called when the player is respawned      
-    public UnityEvent m_OnRagdollEvent;                                       // When ragdoll state is enabled
-    public UnityEvent m_OnRespawnEvent;                                       // Player Respawn animation is going
+    public UnityEvent m_OnSpawnEvent;                                           // Gets called when the player is respawned      
+    public UnityEvent m_OnRagdollEvent;                                         // When ragdoll state is enabled
+    public UnityEvent m_OnRespawnEvent;                                         // Player Respawn animation is going
 
     // the current state of the level / gameplay in the level
     public enum LevelState { Playing, Ragdoll, RespawnAnimation, PauseMenu };
@@ -73,7 +50,6 @@ public class LevelManager : MonoBehaviour
     void Start()
     {
         // get a reference to the game manager
-        Debug.Log(GameObject.Find("GameManager"));
         m_GameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
 
         // get a reference to the camera so that a player can be added
@@ -81,7 +57,7 @@ public class LevelManager : MonoBehaviour
         m_Cam = cam.GetComponent<CameraMovement>();
 
         // get all values needed
-        m_PauseMenu = m_GameManager.m_PauseMenu;
+        m_PauseMenu = m_GameManager.m_PauseMenu.GetComponent<PauseMenu>();
 
         // set the current character to the first character in the character prefab list
         m_NextCharacter = m_CharacterPrefabs[0];
@@ -98,14 +74,15 @@ public class LevelManager : MonoBehaviour
 
         // start ragdoll if player dies
         CharacterController2D.OnDeathEvent.AddListener(StartRagdoll);
+
+        // subscribe to pause and unpause events
+        m_PauseMenu.m_OnPaused.AddListener(OnPaused);
+        m_PauseMenu.m_OnUnpaused.AddListener(OnUnpaused);
     }
 
     // prepares everything needed in the scene
     private void PrepareScene()
     {
-        // disable pause menu ui
-        m_PauseMenu.enabled = false;
-
         // add listener to dropdown
         m_DudeSelectDropdown.onValueChanged.AddListener(delegate
         {
@@ -143,30 +120,15 @@ public class LevelManager : MonoBehaviour
         // allow the dropdown to fire again
         m_HasFired = false;
 
-        // check player inputs
-        if (Input.GetKeyDown("tab"))
+        // check player inputs and the game state is a state in which it can be toggled
+        if (Input.GetKeyDown("tab") && (m_LevelState == LevelState.Playing || m_LevelState == LevelState.PauseMenu))
         {
-            // only allow pause menu if playing
-            if (m_LevelState == LevelState.Playing)
-            {
-                m_LevelState = LevelState.PauseMenu;
-                m_PauseMenu.enabled = true;
-                m_PauseMenuEase = new PauseMenuEase(false, Time.realtimeSinceStartup, m_PauseMenuEaseTime, true, Time.timeScale);
-            } else if (m_LevelState == LevelState.PauseMenu)
-            {
-                // reverse direction of ease
-                m_PauseMenuEase.IsEasingIn = false;
-                m_PauseMenuEase.IsFinished = false;
-                m_PauseMenuEase.StartTime = Time.realtimeSinceStartup;
-                m_PauseMenuEase.StartValue = Time.timeScale;
-            }
+            // toggle pause menu
+            m_PauseMenu.TogglePauseMenu();
         }
 
         // different level states
-        if (m_LevelState == LevelState.PauseMenu)
-        {
-            StatePauseMenu();
-        } else if (m_LevelState == LevelState.Playing)
+        if (m_LevelState == LevelState.Playing)
         {
             StatePlaying();
         } else if (m_LevelState == LevelState.Ragdoll)
@@ -194,26 +156,6 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    private void StatePauseMenu()
-    {
-        if (!m_PauseMenuEase.IsFinished)
-        {
-            // Ease into pause Menu
-            EasePauseMenu();
-        }
-        else if (m_PauseMenuEase.IsEasingIn)
-        {
-            // easing in and done
-        }
-        else
-        {
-            // Easing out and done. Pause menu has endet
-            m_LevelState = LevelState.Playing;
-            // close pause menu
-            m_PauseMenu.enabled = false;
-        }
-    }
-
     private void StateRespawnAnimation()
     {
         // make respawn animation (move camera)
@@ -222,6 +164,18 @@ public class LevelManager : MonoBehaviour
             SpawnPlayer();
             m_LevelState = LevelState.Playing;
         }
+    }
+
+    // gets called when the pause menu paused the game
+    private void OnPaused()
+    {
+        m_LevelState = LevelState.PauseMenu;
+    }
+
+    // gets called when the pause menu unpaused the game
+    private void OnUnpaused()
+    {
+        m_LevelState = LevelState.Playing;
     }
 
     private void SpawnPlayer()
@@ -249,41 +203,6 @@ public class LevelManager : MonoBehaviour
     {
         DestoryPlayer();
         SpawnPlayer();
-    }
-
-    private void EasePauseMenu()
-    {
-        float currentTime = Time.realtimeSinceStartup - m_PauseMenuEase.StartTime;
-        float valueChange;
-
-        if (m_PauseMenuEase.IsEasingIn)
-        {
-            valueChange = -m_PauseMenuEase.StartValue;
-        } else
-        {
-            valueChange = 1f - m_PauseMenuEase.StartValue;
-        }
-
-        float value;
-
-        // check if done with ease
-        if (currentTime > m_PauseMenuEase.Duration)
-        {
-            // done with ease
-            value = m_PauseMenuEase.StartValue + valueChange;
-            m_PauseMenuEase.IsFinished = true;
-        } else
-        {
-            value = UtilityScript.LinearTween(currentTime, m_PauseMenuEase.StartValue, valueChange, m_PauseMenuEase.Duration);
-        }
-
-        // set time to value
-        Time.timeScale = value;
-
-        if (value == m_PauseMenuEase.StartValue + valueChange)
-        {
-            m_PauseMenuEase.IsFinished = true;
-        }
     }
 
     // will be called at the end of the ragdoll
